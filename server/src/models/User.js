@@ -3,7 +3,19 @@ import { Model, DataTypes } from 'sequelize';
 export default function (connection) {
   class User extends Model {
     static associate(db) {
-      
+      db.User.hasMany(db.Availability, {
+        foreignKey: 'userId',
+        as: 'availabilities',
+      });
+      db.User.belongsToMany(db.Class, {
+        through: 'Student_Class',
+        foreignKey: 'userId',
+        as: 'classes',
+      });
+      db.User.hasMany(db.SubjectClass, {
+        foreignKey: 'teacherId',
+        as: 'subjectClasses',
+      });
     }
   }
 
