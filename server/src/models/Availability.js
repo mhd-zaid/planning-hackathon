@@ -14,7 +14,7 @@ export default function (connection) {
     {
       id: { type: DataTypes.UUID, primaryKey: true },
       date: {
-        type: DataTypes.DATE,
+        type: DataTypes.DATEONLY,
         allowNull: false,
         unique: false,
         validate: {

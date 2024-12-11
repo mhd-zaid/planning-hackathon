@@ -1,9 +1,10 @@
 import OpenAI from 'openai';
-import db from '../models/index.js';
 
 const systemPrompt = "Ce qui suit est une demande de planification optimisée de cours sur une periode donnée. La planification doit être otpimisé selon la disponibiité des professeurs et il ne doit pas y avoir\
 de chevauchement de cours, il doit prendre en compte les jours d'école ainsi que les horaires, il faut aussi prendre en compte le nombre d'heure de cours qui ont déja été planifié pour ne pas dépasser le quota\
-d'heure de cours de la filière et de la matière. Attention tu ne peux planifier des heures de cours que sur des créneaux disponibles et sur des jours d'école.La réponse doit être uniquement au format json valide comme l'exemple qui suit: [\
+d'heure de cours de la filière et de la matière. Attention tu ne peux planifier des preWorkHours que sur des créneaux disponibles pour les intervenants en regardant bien leurs disponibilités dans le tableau availabilitiesTeacher, il faut bien que tu fasses attention a matcher les userId des professeurs avec les availabilityTeacher\
+pour savoir quel professeur est disponible et sur des jours d'école.\
+La réponse doit être uniquement au format json valide comme l'exemple qui suit: [\
 {\
     preWorkHour: [\
         {\
