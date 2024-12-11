@@ -10,4 +10,5 @@ export default (app, express) => {
   app.use('/api/school-days', schoolDayRoutes(express.Router()));
   app.use('/api/branches', branchRoutes(express.Router()));
   app.use('/api/availabilities', availabilityRoutes(express.Router()));
+  app.use('/api/plannings', availabilityRoutes(express.Router()));
 };
