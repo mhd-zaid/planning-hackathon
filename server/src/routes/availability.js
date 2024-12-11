@@ -1,8 +1,8 @@
-import availabilityController from '../controllers/availability';
+import availabilityController from '../controllers/availabilityController.js';
 
 export default function (router) {
-    router.post('/', availabilityController.create);
+    router.post('/:userId', availabilityController.create);
     router.put('/:id', availabilityController.update);
-    router.delete('/:id', availabilityController.remove);
+    router.delete('/:id', availabilityController.deleteAvailability);
     return router;
 }
