@@ -5,7 +5,6 @@ import frLocale from "@fullcalendar/core/locales/fr";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useState } from "react";
 import { useCalendarContext } from "@/utils/context/calendar";
-// import useCalendar from "@/utils/hook/useCalendar";
 
 interface Event {
   title: string;
@@ -26,22 +25,22 @@ export default function IntervenantCalendar() {
 
   return (
     <FullCalendar
-    plugins={[dayGridPlugin, timeGridWeek, interactionPlugin]}
-    headerToolbar={headerToolbarProps}
-    locale={frLocale}
-    nowIndicator={true}
-    height={"100%"}
-    selectable={true}
-    dragScroll={true}
-    events={events}
-    editable={true}
-    validRange={semesterRange || undefined}
-    select={(info) =>
-      setEvents([
-        ...events,
-        { title: "Jour dispo", start: info.startStr, end: info.endStr },
-      ])
-    }
-  />
+      plugins={[dayGridPlugin, timeGridWeek, interactionPlugin]}
+      headerToolbar={headerToolbarProps}
+      locale={frLocale}
+      nowIndicator={true}
+      height={"100%"}
+      selectable={true}
+      dragScroll={true}
+      events={events}
+      editable={true}
+      validRange={semesterRange || undefined}
+      select={(info) =>
+        setEvents([
+          ...events,
+          { title: "Jour dispo", start: info.startStr, end: info.endStr },
+        ])
+      }
+    />
   );
 }

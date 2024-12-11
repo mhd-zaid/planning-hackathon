@@ -3,25 +3,53 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridWeek from "@fullcalendar/timegrid";
 import frLocale from "@fullcalendar/core/locales/fr";
 import interactionPlugin from "@fullcalendar/interaction";
-import { useState } from "react";
 import { useCalendarContext } from "@/utils/context/calendar";
-
-interface Event {
-  title: string;
-  start: string;
-  end: string;
-}
+import { DateSelectArg } from "@fullcalendar/core/index.js";
+import { useDataContext } from "@/utils/context/data";
 
 export default function SchoolCalendar() {
   const headerToolbarProps = {
     left: "prev,next today",
     center: "title",
-    right: "timeGridWeek dayGridMonth",
+    right: "dayGridMonth",
   };
 
-  const { semesterRange } = useCalendarContext();
+  const { semesterRange, events, setEvents, selectedClassId } =
+    useCalendarContext();
 
-  const [events, setEvents] = useState<Array<Event>>([]);
+  const { fillieres } = useDataContext();
+
+  const selectedClasse = fillieres
+    .flatMap((filliere) => filliere.classes)
+    .find((classe) => classe.id === selectedClassId);
+
+  const selectDate = (info: DateSelectArg) => {
+    const dateStart = new Date(info.startStr);
+    const dateEnd = new Date(info.endStr);
+
+    const eventExists = events.some((event) => {
+      const eventStart = new Date(event.start);
+      const eventEnd = new Date(event.end);
+      return (
+        (dateStart >= eventStart && dateStart < eventEnd) ||
+        (dateEnd > eventStart && dateEnd <= eventEnd) ||
+        (dateStart <= eventStart && dateEnd >= eventEnd)
+      );
+    });
+
+    if (eventExists) {
+      alert("Un seul événement par jour est autorisé.");
+    } else {
+      setEvents([
+        ...events,
+        {
+          title: selectedClasse?.name || "",
+          start: info.startStr,
+          end: info.endStr,
+        },
+      ]);
+    }
+  };
 
   return (
     <FullCalendar
@@ -30,17 +58,17 @@ export default function SchoolCalendar() {
       locale={frLocale}
       nowIndicator={true}
       height={"100%"}
-      dragScroll={true}
       events={events}
       editable={true}
       validRange={semesterRange || undefined}
       selectable={!!semesterRange}
-      select={(info) =>
-        setEvents([
-          ...events,
-          { title: "Jour ouvré", start: info.startStr, end: info.endStr },
-        ])
+      dateClick={() =>
+        !!!semesterRange && alert("Veuillez sélectionner une période")
       }
+      eventClick={(e) =>
+        setEvents(events.filter((event) => event.title !== e.event._def.title))
+      }
+      select={selectDate}
     />
   );
 }

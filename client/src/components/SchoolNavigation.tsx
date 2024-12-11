@@ -1,28 +1,28 @@
-// import { useCalendarContext } from "@/utils/context/calendar";
-// import { ChangeEvent, useState } from "react";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect } from "react";
 import LogoutButton from "./Logout";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { useDataContext } from "@/utils/context/data";
 import { Period } from "@/utils/types/period.interface";
-
-// enum ValueSemester {
-//   SEMESTER_ONE = "1",
-//   SEMESTER_TWO = "2",
-// }
 
 export default function SchoolNavigation() {
   const { setSemesterRange } = useCalendarContext();
 
   const { fillieres } = useDataContext();
 
-  const { setShowAdmin, showAdmin } = useCalendarContext();
+  const {
+    setShowAdmin,
+    showAdmin,
+    events,
+    selectedClassId,
+    selectedFilliere,
+    setSelectedClassId,
+    setSelectedFilliere,
+  } = useCalendarContext();
 
-  const [selectedFilliere, setSelectedFilliere] = useState<string>("");
-
-  const classesFromFilliere = (selectedFilliereValue: string) =>
-    fillieres.find((filliere) => filliere.id === selectedFilliereValue)
+  const classesFromFilliere = (selectedFilliereValue: string) => {
+    return fillieres.find((filliere) => filliere.id === selectedFilliereValue)
       ?.classes;
+  };
 
   const periodFromFilliere = (selectedFilliereValue: string) => {
     const periods = fillieres
@@ -45,6 +45,11 @@ export default function SchoolNavigation() {
   const onChangeSemester = (e: ChangeEvent<HTMLSelectElement>) => {
     const idPeriod = e.target.value;
 
+    if (!idPeriod) {
+      setSemesterRange(null);
+      return;
+    }
+
     const period = periodFromFilliere(selectedFilliere)?.find(
       (period) => period.id === idPeriod
     );
@@ -56,6 +61,77 @@ export default function SchoolNavigation() {
       end: new Date(period.endDate).toISOString(),
     });
   };
+
+  const submitForm = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedClassId) {
+      alert("Veuillez choisir une classe");
+      return;
+    }
+    if (!events.length) {
+      alert("Veuillez choisir des dates");
+      return;
+    }
+
+    const getDatesBetween = (startDate: string, endDate: string) => {
+      const dates = [];
+      const currentDate = new Date(startDate);
+      const end = new Date(endDate);
+
+      while (currentDate <= end) {
+        dates.push(new Date(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      return dates;
+    };
+
+    const formattedEvents: { date: string }[] = events.map((event) => {
+      if (new Date(event.start).getDay === new Date(event.end).getDay) {
+        return {
+          date: event.start,
+        };
+      } else {
+        const dates = getDatesBetween(event.start, event.end);
+        console.log("dates", dates);
+        return {
+          date: "",
+        };
+        // Ici je dois récupérer tout les jours entre le jours de début inclus et le jours de fin inclus
+        // const dates = getDatesBetween(event.start, event.end);
+        // return dates.map((date) => ({
+        //   start: date.toISOString(),
+        //   end: date.toISOString(),
+        // }));
+      }
+    });
+
+    formattedEvents.forEach(async (event) => {
+      try {
+        await fetch(
+          `${process.env.NEXT_PUBLIC_URL_API}/school-days/${selectedClassId}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              date: event.date,
+            }),
+          }
+        );
+      } catch (error) {
+        console.log("error", error);
+      }
+    });
+  };
+
+  useEffect(() => {
+    const classes = classesFromFilliere(selectedFilliere);
+    if (classes && classes.length > 0) {
+      setSelectedClassId(classes[0].id);
+    }
+  }, [selectedFilliere]);
 
   return (
     <aside className="w-64 h-screen ">
@@ -82,7 +158,7 @@ export default function SchoolNavigation() {
           </select>
 
           {classesFromFilliere(selectedFilliere) && (
-            <>
+            <form onSubmit={submitForm}>
               <p className="block my-2 text-sm font-medium text-gray-900 ">
                 Choisir une classe
               </p>
@@ -96,7 +172,9 @@ export default function SchoolNavigation() {
                           type="radio"
                           name="classe-radio"
                           value={classe.id}
+                          checked={selectedClassId === classe.id}
                           className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                          onChange={(e) => setSelectedClassId(e.target.value)}
                         />
                       </div>
                       <div className="ms-2 text-sm">
@@ -145,7 +223,14 @@ export default function SchoolNavigation() {
                   </option>
                 ))}
               </select>
-            </>
+
+              <button
+                type="submit"
+                className="w-full text-center p-2 my-5 rounded-lg bg-first"
+              >
+                Enregistrer les jours
+              </button>
+            </form>
           )}
         </div>
         <div>
