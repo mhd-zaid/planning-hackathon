@@ -5,26 +5,26 @@ import PlanningService from "../service/planning-service.js";
 
 const getPlanning = async (req, res) => {
   try {
+    const classId = req.params.classId;
+
+    const {start, end} = req.query;
+
+    // if(!start || !end){
+    //   return res.status(400).json("Date de début et de fin manquantes");
+    // }
+    if(!checkUUID(classId)){
+      return res.status(400).json("Identifiant de classe invalide");
+    }
+
     const planningService = new PlanningService();
-    const response = await planningService.getOpenAICompletion({"Test": "Test"});
+    const response = await planningService.getOpenAICompletion(getDataToGeneratePlanning(classId, start, end));
     res.status(200).send(response.choices[0].message);
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
 };
 
-const generatePlanning = async(req, res) => {
-  const classId = req.params.classId;
-
-  const {start, end} = req.query;
-
-  if(!start || !end){
-    return res.status(400).json("Date de début et de fin manquantes");
-  }
-  if(!checkUUID(classId)){
-    return res.status(400).json("Identifiant de classe invalide");
-  }
-
+const getDataToGeneratePlanning = async(classId, startDate,endDate) => {
   const schoolClass = await db.School.findAll();
   const school = schoolClass?.[0];
 
@@ -74,14 +74,13 @@ const generatePlanning = async(req, res) => {
       }
     }
   });
-  
 
-  return res.status(200).json({
+  return {
     workHours,
     availabilitiesTeacher,
     school,
     classOpeningDay
-  });
+  };
 
 }
-export default {getPlanning, generatePlanning};
+export default {getPlanning};

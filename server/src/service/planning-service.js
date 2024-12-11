@@ -3,7 +3,32 @@ import db from '../models/index.js';
 
 const systemPrompt = "Ce qui suit est une demande de planification optimisée de cours sur une periode donnée. La planification doit être otpimisé selon la disponibiité des professeurs et il ne doit pas y avoir\
 de chevauchement de cours, il doit prendre en compte les jours d'école ainsi que les horaires, il faut aussi prendre en compte le nombre d'heure de cours qui ont déja été planifié pour ne pas dépasser le quota\
-d'heure de cours de la filière et de la matière. la réponse doit être au format json.";
+d'heure de cours de la filière et de la matière. La réponse doit être uniquement au format json valide comme l'exemple qui suit: [\
+{\
+    preWorkHour: [\
+        {\
+        startDate:'',\
+        endDate:'',\
+        subjectClassId:'',\
+        teacher:{\
+            firstname:'',\
+            lastname:'',\
+        },\
+        subject:{\
+            name:'',\
+            color:'',\
+        },\
+    ],\
+    backlogHoursSubjectClass : [\
+        {\
+            subjectClassId:'',\
+            nbHoursClassPlanified:'',\
+            nbrHoursClassLeft:'',\
+            nbrHoursClassTotal:'',\
+        }\
+    ],\
+}\
+]";
 
 class PlanningService {
   constructor() {
