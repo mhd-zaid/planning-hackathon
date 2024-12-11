@@ -6,6 +6,7 @@ import usersFixture from "./user.js";
 import schoolFixture from './school.js';
 import branchesFixture from './branch.js';
 import subjectsFixture from './subject.js';
+import db from '../models/index.js';
 
 const loadUsers = async () => {
   const model = (await import('../models/User.js')).default(connection);
@@ -55,20 +56,20 @@ const loadBranches = async () => {
 }
 
 const loadSubjects = async () => {
-  const model = (await import('../models/Subject.js')).default(connection);
-  const branchModel = (await import('../models/Branch.js')).default(connection);
+  const model = db.Subject;
+  const branchModel = db.Branch;
   try {
     const branches = await branchModel.findAll();
     await Promise.all(
       subjectsFixture.map(subject => {
         const branch = branches.find(branch => branch.name === subject.branch);
-        console.log(branch.id);
+        console.log(branch.id)
         return model.create({
           id: subject.id,
           name: subject.name,
           nbHoursQuota: subject.nbHoursQuota,
           nbHoursQuotaExam: subject.nbHoursQuotaExam,
-          branch: branch,
+          branchId: branch.id,
         });
       }),
     );
