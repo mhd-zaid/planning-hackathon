@@ -35,7 +35,7 @@ const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
       classId: classId
     }
   });
-  const classOpeningDay = classOpeningDayInstances.map(day => day.toJSON());
+  const schoolDaysClass = classOpeningDayInstances.map(day => day.toJSON());
 
   const teachersId = [];
   const subjectClassId = [];
@@ -48,6 +48,10 @@ const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
       {
         model: db.User,
         as: "teacher"
+      },
+      {
+        model: db.Subject,
+        as: "subject"
       }
     ]
   });
@@ -83,7 +87,7 @@ const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
     workHours,
     availabilitiesTeacher,
     school,
-    classOpeningDay,
+    schoolDaysClass,
     subjectClass
   };
 };
