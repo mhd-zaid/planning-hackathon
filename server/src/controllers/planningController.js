@@ -18,7 +18,7 @@ const getPlanning = async (req, res) => {
 
     const planningService = new PlanningService();
     const datas = await getDataToGeneratePlanning(classId, start, end);
-    console.log(datas);
+    // console.log(datas);
     const response = await planningService.getOpenAICompletion(datas);
     res.status(200).send(response.choices[0].message.content);
   } catch (error) {
@@ -66,13 +66,29 @@ const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
   });
 
   const workHourInstances = await db.WorkHour.findAll({
-    where: {
-      subjectClassId: {
-        [Op.in]: subjectClassId,
-      }
-    }
+    attributes: ['id', 'beginDate', 'endDate'],
+    include: [
+      {
+        model: db.SubjectClass,
+        as: 'subjectClass',
+        where: {
+          teacherId: {
+            [Op.in]: teachersId, // Filtrer par les IDs des enseignants
+          },
+        },
+        attributes: ['id', 'classId', 'subjectId'],
+        include: [
+          {
+            model: db.User,
+            as: 'teacher',
+            attributes: ['firstname', 'lastname', 'id'],
+          },
+        ],
+      },
+    ],
   });
   const workHours = workHourInstances.map(workHour => workHour.toJSON());
+  console.log(workHours);
 
   const availabilityInstances = await db.Availability.findAll({
     where: {
