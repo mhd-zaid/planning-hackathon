@@ -33,16 +33,18 @@ Based on the input data, generate a JSON object strictly in the following format
 ]
 
 ### Input Data:
-- **workHours**: List of time slots where teachers are not available. No lesson should be scheduled for the teacher concerned if it corresponds to an available slot in this list.
+- **workHours**: List of time slots where teachers are not available. A workHour have a property subjectClass, in subjectClass there is an object teacher to know who is the current teacher booked for this workHour.
 - **availabilitiesTeacher**: Array of objects indicating the availability of teachers.
-- **school**: Object providing school information.
 - **schoolDaysClass**: Array of objects indicating school working days.
 - **subjectClass**: Array of objects defining classes, their associated teachers, and subjects.
+
+### Output Data : 
+- **preWorkHour**: Array of objects indicating the new potential workHours.
+- **backlogHoursSubjectClass**: Array of objects indicating the remaining hours to schedule for each class.
 
 ### Constraints:
 1. A teacher must be available during the planned time slot (from availabilitiesTeacher).
 2. A teacher cannot have overlapping courses during the planned time slot (from workHours).
-3. Courses must be scheduled during school opening hours and on school working days (from schoolDaysClass).
 
 ### Notes:
 1. The 'nbHoursClassPlanified' field should represent the total number of hours scheduled for the given 'subjectClassId'.

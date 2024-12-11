@@ -21,21 +21,22 @@ const getPlanning = async (req, res) => {
     // console.log(datas);
     const response = await planningService.getOpenAICompletion(datas);
     res.status(200).send(response.choices[0].message.content);
+    // return res.status(200).json(datas);
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
 };
 
 const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
-  const schoolClass = await db.School.findAll();
-  const school = schoolClass?.[0]?.toJSON();
-
   const classOpeningDayInstances = await db.SchoolDayClass.findAll({
     where: {
       classId: classId
-    }
+    },
+    attributes: ['date']
   });
   const schoolDaysClass = classOpeningDayInstances.map(day => day.toJSON());
+
+  console.log(schoolDaysClass);
 
   const teachersId = [];
   const subjectClassId = [];
@@ -44,14 +45,17 @@ const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
     where: {
       classId: classId
     },
+    attributes: ['id'],
     include: [
       {
         model: db.User,
-        as: "teacher"
+        as: "teacher",
+        attributes: ['firstname', 'lastname', 'id']
       },
       {
         model: db.Subject,
-        as: "subject"
+        as: "subject",
+        attributes: ['name', 'nbHoursQuota', 'nbHoursQuotaExam', 'color']
       }
     ]
   });
@@ -66,7 +70,7 @@ const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
   });
 
   const workHourInstances = await db.WorkHour.findAll({
-    attributes: ['id', 'beginDate', 'endDate'],
+    attributes: ['beginDate', 'endDate'],
     include: [
       {
         model: db.SubjectClass,
@@ -76,7 +80,7 @@ const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
             [Op.in]: teachersId, // Filtrer par les IDs des enseignants
           },
         },
-        attributes: ['id', 'classId', 'subjectId'],
+        attributes: ['id'],
         include: [
           {
             model: db.User,
@@ -88,21 +92,24 @@ const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
     ],
   });
   const workHours = workHourInstances.map(workHour => workHour.toJSON());
-  console.log(workHours);
 
   const availabilityInstances = await db.Availability.findAll({
     where: {
       userId: {
         [Op.in]: teachersId,
       }
-    }
-  });
+    },
+    attributes: [
+      'beginDate',
+      'endDate',
+      ['userId', 'teacherId']
+    ], 
+   });
   const availabilitiesTeacher = availabilityInstances.map(availability => availability.toJSON());
 
   return {
     workHours,
     availabilitiesTeacher,
-    school,
     schoolDaysClass,
     subjectClass
   };

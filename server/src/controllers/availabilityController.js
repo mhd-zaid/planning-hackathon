@@ -42,47 +42,48 @@ const create = async (req, res) => {
             return res.status(404).json({message: "L'utilisateur n'existe pas"});
         }
 
-        const overlap = await db.Availability.findOne({
-            where: {
-                userId: req.params.userId,
-                [Op.or]: [
-                    {
-                        start: {
-                            [Op.between]: [availability.start, availability.end]
-                        }
-                    },
-                    {
-                        end: {
-                            [Op.between]: [availability.start, availability.end]
-                        }
-                    },
-                    {
-                        [Op.and]: [
-                            {
-                                start: {
-                                    [Op.lte]: availability.start
-                                }
-                            },
-                            {
-                                end: {
-                                    [Op.gte]: availability.end
-                                }
-                            }
-                        ]
-                    }
-                ]
-            }
-        });
+        // const overlap = await db.Availability.findOne({
+        //     where: {
+        //         userId: req.params.userId,
+        //         [Op.or]: [
+        //             {
+        //                 start: {
+        //                     [Op.between]: [availability.start, availability.end]
+        //                 }
+        //             },
+        //             {
+        //                 end: {
+        //                     [Op.between]: [availability.start, availability.end]
+        //                 }
+        //             },
+        //             {
+        //                 [Op.and]: [
+        //                     {
+        //                         start: {
+        //                             [Op.lte]: availability.start
+        //                         }
+        //                     },
+        //                     {
+        //                         end: {
+        //                             [Op.gte]: availability.end
+        //                         }
+        //                     }
+        //                 ]
+        //             }
+        //         ]
+        //     }
+        // });
 
-        if (overlap) {
-            return res.status(400).json({message: "La disponibilité chevauche une autre disponibilité existante"});
-        }
+        // if (overlap) {
+        //     return res.status(400).json({message: "La disponibilité chevauche une autre disponibilité existante"});
+        // }
+
+        console.log(availability);
 
         const newAvailability = await db.Availability.create({
             id: uuidv4(),
-            date: availability.date,
-            start: availability.start,
-            end: availability.end,
+            beginDate: availability.beginDate,
+            endDate: availability.endDate,
             isFavorite: availability.isFavorite,
             userId: req.params.userId
         });
