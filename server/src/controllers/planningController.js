@@ -28,17 +28,23 @@ const getPlanning = async (req, res) => {
 };
 
 const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
+
+  // Récupérer les school day class between start and end date
   const classOpeningDayInstances = await db.SchoolDayClass.findAll({
     where: {
       classId: classId
     },
     attributes: ['date']
   });
+
   const schoolDaysClass = classOpeningDayInstances.map(day => day.toJSON());
 
   const teachersId = [];
   const subjectClassId = [];
 
+  // Récupérer les subject class between start and end date
+  // on doit récupérer les subject class par rapport au mois courant et checker quel période est associé
+  // Mois de janvier => je recupere les subjectclass qui ont la période sur le mois de janvier
   const subjectClassInstances = await db.SubjectClass.findAll({
     where: {
       classId: classId
@@ -67,6 +73,7 @@ const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
     return pureSubject;
   });
 
+  // Pour les workHours il faut tout récupérer pour la période donnée (s1, s2)
   const workHourInstances = await db.WorkHour.findAll({
     attributes: ['beginDate', 'endDate'],
     include: [
