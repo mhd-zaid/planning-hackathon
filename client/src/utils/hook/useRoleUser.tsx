@@ -1,5 +1,5 @@
 import StudentCalendar from "@/components/StudentCalendar";
-import { RoleUser } from "../types/role-user.hook";
+import { RoleUser } from "../types/role-user.enum";
 import IntervenantCalendar from "@/components/IntervenantCalendar";
 import SchoolCalendar from "@/components/SchoolCalendar";
 import StudentNavigation from "@/components/StudentNavigation";
@@ -20,6 +20,7 @@ export default function useRoleUser() {
     [RoleUser.INTERVENANT]: <IntervenantNavigation />,
     [RoleUser.SCHOOL]: <SchoolNavigation />,
   };
+
   return {
     renderCalendar,
     renderNavigation,
