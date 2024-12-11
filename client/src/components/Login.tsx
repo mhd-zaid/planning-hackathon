@@ -20,11 +20,10 @@ const Login = () => {
       const user = users.find((u) => u.email === email);
 
       if (user) {
-        setMessage(`Bienvenue, ${user.firstname} ${user.lastname} !`);
         localStorage.setItem('loggedInUser', JSON.stringify(user));
         setTimeout(() => {
           redirect('/');
-        }, 2000);
+        }, 10);
       } else {
         setMessage('Adresse email introuvable.');
       }
@@ -67,9 +66,6 @@ const Login = () => {
             Se Connecter
           </button>
         </form>
-        {message && (
-          <p className="mt-4 text-center text-sm text-red-600">{message}</p>
-        )}
       </div>
     </div>
     );

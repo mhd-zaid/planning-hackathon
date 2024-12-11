@@ -4,11 +4,15 @@ import { SemesterRange } from "../types/semester-range.interface";
 interface CalendarContextType {
   semesterRange: SemesterRange | null;
   setSemesterRange: React.Dispatch<React.SetStateAction<SemesterRange | null>>;
+  showAdmin : boolean;
+  setShowAdmin : React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const CalendarContext = createContext<CalendarContextType>({
   semesterRange: null,
   setSemesterRange: () => {},
+  showAdmin: false,
+  setShowAdmin: () => {},
 });
 
 export const CalendarProvider = ({
@@ -20,9 +24,13 @@ export const CalendarProvider = ({
     null
   );
 
+  const [showAdmin, setShowAdmin] = useState(false);
+
   const value = {
     semesterRange,
     setSemesterRange,
+    showAdmin,
+    setShowAdmin,
   };
 
   return (
