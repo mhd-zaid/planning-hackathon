@@ -29,7 +29,6 @@ export default function (connection) {
   SubjectClass.init(
     {
         id: { type: DataTypes.UUID, primaryKey: true },
-        color: { type: DataTypes.STRING },
     },
     {
       sequelize: connection,
