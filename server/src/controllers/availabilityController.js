@@ -69,7 +69,68 @@ const create = async (req, res) => {
 }
 
 const update = async (req, res) => {
+    try {
+        const availability = req.body;
 
+        const availabilityExist = await db.Availability.findOne({
+            where: {
+                id: req.params.id
+            }
+        });
+
+        if (!availabilityExist) {
+            return res.status(404).json({message: "La disponibilité n'existe pas"});
+        }
+
+        const overlap = await db.Availability.findOne({
+            where: {
+                userId: availabilityExist.userId,
+                [Op.or]: [
+                    {
+                        start: {
+                            [Op.between]: [availability.start, availability.end]
+                        }
+                    },
+                    {
+                        end: {
+                            [Op.between]: [availability.start, availability.end]
+                        }
+                    },
+                    {
+                        [Op.and]: [
+                            {
+                                start: {
+                                    [Op.lte]: availability.start
+                                }
+                            },
+                            {
+                                end: {
+                                    [Op.gte]: availability.end
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        });
+
+        if (overlap && overlap.id !== availabilityExist.id) {
+            return res.status(400).json({message: "La disponibilité chevauche une autre disponibilité existante"});
+        }
+
+        await availabilityExist.update({
+            date: availability.date,
+            start: availability.start,
+            end: availability.end,
+            isFavorite: availability.isFavorite
+        });
+
+        return res.status(200).json({availability: availabilityExist});
+    } catch (error) {
+        console.error("Une erreur s'est produite :", error);
+        return res
+            .status(500).json({error: "Une erreur s'est produite"});
+    }
 }
 
 const deleteAvailability = async (req, res) => {
