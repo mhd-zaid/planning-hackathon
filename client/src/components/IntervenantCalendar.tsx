@@ -16,6 +16,8 @@ export default function IntervenantCalendar() {
       headerToolbar={headerToolbarProps}
       weekends={true}
       locale={frLocale}
+      nowIndicator={true}
+      height={"100%"}
     />
   );
 }
