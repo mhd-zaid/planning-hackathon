@@ -3,13 +3,14 @@ import { Model, DataTypes } from 'sequelize';
 export default function (connection) {
     class Unavailability extends Model {
         static associate(db) {
-            db.UnAvailability.belongsTo(db.User, {
+            db.Unavailability.belongsTo(db.User, {
                 foreignKey: 'userId',
                 as: 'teacher',
             });
-            db.UnAvailability.belongsTo(db.WorkHour, {
-                foreignKey: 'userId',
+            db.Unavailability.belongsTo(db.WorkHour, {
+                foreignKey: 'workHourId',
                 as: 'workHour',
+                onDelete: 'CASCADE',
             });
         }
     }
