@@ -6,7 +6,11 @@ import usersFixture from "./user.js";
 import schoolFixture from './school.js';
 import branchesFixture from './branch.js';
 import subjectsFixture from './subject.js';
+import classesFixture from './class.js';
+import periodsFixture from './period.js';
+import subjectClassesFixture from './subjectClass.js';
 import db from '../models/index.js';
+import { col } from 'sequelize';
 
 const loadUsers = async () => {
   const model = (await import('../models/User.js')).default(connection);
@@ -68,6 +72,7 @@ const loadSubjects = async () => {
           name: subject.name,
           nbHoursQuota: subject.nbHoursQuota,
           nbHoursQuotaExam: subject.nbHoursQuotaExam,
+          color: subject.color,
           branchId: branch.id,
         });
       }),
@@ -99,6 +104,81 @@ async function loadRooms() {
   console.log('20 salles ont été créées avec succès.');
 }
 
+const loadClasses = async () => {
+  const model = db.Class;
+  const branchModel = db.Branch;
+  try {
+    const branches = await db.Branch.findAll();
+    await Promise.all(
+      classesFixture.map(classData => {
+        const branch = branches.find(branch => branch.name === classData.branch);
+        return model.create({
+          id: classData.id,
+          name: classData.name,
+          branchId: branch.id,
+        });
+      }
+      ));
+    console.log('Classes loaded');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+const loadPeriods = async () => {
+  const model = db.Period;
+  try {
+    await Promise.all(
+      periodsFixture.map(period => model.create(period)),
+    );
+    console.log('Periods loaded');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+const loadSubjectClasses = async () => {
+  const subjectClassModel = db.SubjectClass;
+  const subjectModel = db.Subject;
+  const classModel = db.Class;
+  const userModel = db.User;
+  const periodModel = db.Period;
+
+  try {
+    // Récupérer les matières, les classes, les professeurs et les périodes
+    const subjects = await subjectModel.findAll();
+    const classes = await classModel.findAll();
+    const professors = await userModel.findAll({ where: { role: 'professor' } });
+    const periods = await periodModel.findAll();
+
+    // Associer les professeurs aux matières et aux classes de manière cohérente
+    let indexProfessor = 0;  // Point de départ des professeurs (Cyclique)
+
+    // Remplir les SubjectClass
+    const subjectClassesData = [];
+    subjects.forEach(subject => {
+      const subjectClassesForThisSubject = classes.filter(cls => cls.branchId === subject.branchId);
+
+      // Répartir les professeurs parmi les classes de cette matière
+      subjectClassesForThisSubject.forEach(cls => {
+        subjectClassesData.push({
+          id: uuidv4(),
+          subjectId: subject.id,
+          classId: cls.id,
+          teacherId: professors[indexProfessor % professors.length].id,
+          periodId: periods[0].id, 
+        });
+        indexProfessor++;
+      });
+    });
+
+    // Insertion dans la table SubjectClass
+    await subjectClassModel.bulkCreate(subjectClassesData);
+    console.log('SubjectClasses loaded');
+  } catch (err) {
+    console.error(err);
+  }
+};
 
 const main = async () => {
   try {
@@ -108,6 +188,9 @@ const main = async () => {
     await loadSchool();
     await loadBranches();
     await loadSubjects();
+    await loadClasses();
+    await loadPeriods();
+    await loadSubjectClasses();
   } catch (error) {
     console.error(error);
   } finally {

@@ -4,17 +4,17 @@ const branches = [
   {
     id: uuidv4(),
     name: 'Ingénierie du web',
-    nbHoursQuota: 200,
+    nbHoursQuota: 110,
   },
   {
     id: uuidv4(),
     name: 'Mobilité et objets connectés',
-    nbHoursQuota: 300,
+    nbHoursQuota: 190,
   },
   {
     id: uuidv4(),
     name: 'Marketing digital',
-    nbHoursQuota: 150,
+    nbHoursQuota: 90,
   },
 ];
 

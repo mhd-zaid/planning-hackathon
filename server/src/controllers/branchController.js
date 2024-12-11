@@ -8,12 +8,35 @@ const getAll = async(req, res) => {
             {
               model: db.Subject,
               as: 'subjects',
-              attributes: ['id', 'name', 'nbHoursQuota', 'nbHoursQuotaExam'],
+              attributes: ['id', 'name', 'nbHoursQuota', 'nbHoursQuotaExam', 'color'],
             },
             {
                 model: db.Class,
                 as: 'classes',
-                attributes: ['id'],
+                attributes: ['id', 'name'],
+                include: [
+                  {
+                    model: db.SubjectClass,
+                    as: 'subjectClasses',
+                    include: [
+                      {
+                        model: db.Subject,
+                        as: 'subject',
+                        attributes: ['id', 'name', 'nbHoursQuota', 'nbHoursQuotaExam', 'color'],
+                      },
+                      {
+                        model: db.User,
+                        as: 'teacher',
+                        attributes: ['id', 'firstname', 'lastname'],
+                      },
+                      {
+                        model: db.Period,
+                        as: 'period',
+                        attributes: ['id', 'beginDate', 'endDate'],
+                      }
+                    ]
+                  }
+                ]
             }
           ],
         }
