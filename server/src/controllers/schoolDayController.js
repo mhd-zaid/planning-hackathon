@@ -95,8 +95,6 @@ const deleteSchoolDay = async(req, res) => {
   try{
     const schoolDayClassId = req.params.schoolDayClassId;
 
-    console.log(schoolDayClassId);
-
     if(!checkUUID(schoolDayClassId)) {
       return res
         .status(400)
