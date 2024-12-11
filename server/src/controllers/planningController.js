@@ -89,7 +89,7 @@ const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
       },
     ],
   });
-  const workHours = workHourInstances.map(workHour => workHour.toJSON());
+  const unavailabilityHours = workHourInstances.map(workHour => workHour.toJSON());
 
   const availabilityInstances = await db.Availability.findAll({
     where: {
@@ -106,7 +106,7 @@ const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
   const availabilitiesTeacher = availabilityInstances.map(availability => availability.toJSON());
 
   return {
-    workHours,
+    unavailabilityHours,
     availabilitiesTeacher,
     schoolDaysClass,
     subjectClass

@@ -23,15 +23,18 @@ Based on the input data, generate a JSON object strictly in the following format
 }
 
 ### Input Data:
-- **workHours**: List of time slots where teachers are working. Each WorkHour has a SubjectClass property that contains the teacher information.
+- **unavailabilityHours**: List of time slots where teachers are unavailable. Each unavailability object has a SubjectClass property that contains the teacher information and the beginDate/endDate for the unavailability period.
 - **availabilitiesTeacher**: Array of objects indicating the availability of teachers.
 - **schoolDaysClass**: Array of objects indicating school working days.
 - **subjectClass**: Array of objects defining classes, their associated teachers, and subjects.
 
 ### Constraints:
 1. A teacher must be available during the planned time slot (from availabilitiesTeacher).
-2. A teacher cannot have overlapping courses during the planned time slot (from workHours).
+2. A teacher cannot have overlapping courses during the planned time slot (from unavailabilityHours).
 3. A new potential work hour must be on a school working day (from schoolDaysClass).
+
+### Example Output :
+- I have two teachers, John and Jane. John is available between 08:00 and 12:00 on Monday but he is also unavaible between 10:00 and 12:00. Jane is available between 15:00 and 18:00 on Monday. If i have a school day on monday, i can plan a course between 08:00 and 10:00 with John and between 15:00 and 18:00 with Jane.
 
 Use the input data to generate a JSON object strictly in the format specified above.
 `;
