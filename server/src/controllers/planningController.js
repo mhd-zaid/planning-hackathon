@@ -1,17 +1,17 @@
 import db from '../models/index.js';
 import { checkUUID } from '../utils/uuid.js';
 import { Op } from 'sequelize';
+import PlanningService from "../service/planning-service.js";
 
-const getAll = async(req, res) => {
-    try {
-      
-      return res.status(200).json("planning");
-    } catch (error) {
-      console.error("Une erreur s'est produite :", error);
-      return res
-        .status(500).error("Une erreur s'est produite");
-    }
-}
+const getPlanning = async (req, res) => {
+  try {
+    const planningService = new PlanningService();
+    const response = await planningService.getOpenAICompletion({"Test": "Test"});
+    res.status(200).send(response.choices[0].message);
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};
 
 const generatePlanning = async(req, res) => {
   const classId = req.params.classId;
@@ -84,4 +84,4 @@ const generatePlanning = async(req, res) => {
   });
 
 }
-export default {getAll, generatePlanning}
+export default {getPlanning, generatePlanning};
