@@ -8,7 +8,7 @@ const getAll = async(req, res) => {
             {
               model: db.Subject,
               as: 'subjects',
-              attributes: ['id', 'name', 'nbHoursQuota', 'nbHoursQuotaExam'],
+              attributes: ['id', 'name', 'nbHoursQuota', 'nbHoursQuotaExam', 'color'],
             },
             {
                 model: db.Class,
@@ -22,7 +22,7 @@ const getAll = async(req, res) => {
                       {
                         model: db.Subject,
                         as: 'subject',
-                        attributes: ['id', 'name', 'nbHoursQuota', 'nbHoursQuotaExam'],
+                        attributes: ['id', 'name', 'nbHoursQuota', 'nbHoursQuotaExam', 'color'],
                       },
                       {
                         model: db.User,
