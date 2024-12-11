@@ -2,6 +2,32 @@ import db from '../models/index.js';
 import {uuidv4} from "uuidv7";
 import {Op} from "sequelize";
 
+
+const getAll = async (req, res) => {
+    try {
+        const availabilities = await db.Availability.findAll({
+            where: {
+                userId: req.params.userId
+            }
+        });
+
+        const userExist = await db.User.findOne({
+            where: {
+                id: req.params.userId
+            }
+        })
+
+        if (!userExist) {
+            return res.status(404).json({message: "L'utilisateur n'existe pas"});
+        }
+
+        return res.status(200).json(availabilities);
+    } catch (error) {
+        console.error("Une erreur s'est produite :", error);
+        return res
+            .status(500).json({error: "Une erreur s'est produite"});
+    }
+}
 const create = async (req, res) => {
     try {
         const availability = req.body;
@@ -154,4 +180,4 @@ const deleteAvailability = async (req, res) => {
     }
 }
 
-export default {create, update, deleteAvailability}
+export default {create, update, deleteAvailability, getAll}
