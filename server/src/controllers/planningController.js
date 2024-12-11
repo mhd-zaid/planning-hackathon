@@ -17,30 +17,30 @@ const getPlanning = async (req, res) => {
     }
 
     const planningService = new PlanningService();
-    const response = await planningService.getOpenAICompletion(getDataToGeneratePlanning(classId, start, end));
+    const datas = await getDataToGeneratePlanning(classId, start, end);
+
+    const response = await planningService.getOpenAICompletion(datas);
     res.status(200).send(response.choices[0].message);
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
 };
 
-const getDataToGeneratePlanning = async(classId, startDate,endDate) => {
+const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
   const schoolClass = await db.School.findAll();
-  const school = schoolClass?.[0];
+  const school = schoolClass?.[0]?.toJSON();
 
-  const classOpeningDay = await db.SchoolDayClass.findAll({
+  const classOpeningDayInstances = await db.SchoolDayClass.findAll({
     where: {
       classId: classId
     }
   });
-
-  // Il faut connaitre les professeurs pour cette classe
-  // => sélectionner tous les subjectClass pour avoir la list edes intervenants
+  const classOpeningDay = classOpeningDayInstances.map(day => day.toJSON());
 
   const teachersId = [];
   const subjectClassId = [];
 
-  const subjectClass = await db.SubjectClass.findAll({
+  const subjectClassInstances = await db.SubjectClass.findAll({
     where: {
       classId: classId
     },
@@ -52,35 +52,40 @@ const getDataToGeneratePlanning = async(classId, startDate,endDate) => {
     ]
   });
 
-  for(const subject of subjectClass){
-    if (!teachersId.includes(subject.teacher.id)) teachersId.push(subject.teacher.id);
-    subjectClassId.push(subject.id);
-  }
-  
-  //Récupération de toutes les workHours
-  const workHours = await db.WorkHour.findAll({
+  const subjectClass = subjectClassInstances.map(subject => {
+    const pureSubject = subject.toJSON();
+    if (!teachersId.includes(pureSubject.teacher.id)) {
+      teachersId.push(pureSubject.teacher.id);
+    }
+    subjectClassId.push(pureSubject.id);
+    return pureSubject;
+  });
+
+  const workHourInstances = await db.WorkHour.findAll({
     where: {
       subjectClassId: {
         [Op.in]: subjectClassId,
       }
     }
   });
+  const workHours = workHourInstances.map(workHour => workHour.toJSON());
 
-  //Récupération de toutes les disponibilités
-  const availabilitiesTeacher = await db.Availability.findAll({
+  const availabilityInstances = await db.Availability.findAll({
     where: {
       userId: {
         [Op.in]: teachersId,
       }
     }
   });
+  const availabilitiesTeacher = availabilityInstances.map(availability => availability.toJSON());
 
   return {
     workHours,
     availabilitiesTeacher,
     school,
-    classOpeningDay
+    classOpeningDay,
+    subjectClass
   };
+};
 
-}
 export default {getPlanning};
