@@ -63,7 +63,6 @@ const loadSubjects = async () => {
     await Promise.all(
       subjectsFixture.map(subject => {
         const branch = branches.find(branch => branch.name === subject.branch);
-        console.log(branch.id)
         return model.create({
           id: subject.id,
           name: subject.name,
@@ -103,6 +102,7 @@ async function loadRooms() {
 
 const main = async () => {
   try {
+    await connection.sync({ force: true });
     await loadUsers();
     await loadRooms();
     await loadSchool();
