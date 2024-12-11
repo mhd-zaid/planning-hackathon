@@ -1,14 +1,17 @@
 "use client";
 
 import { CalendarProvider, useCalendarContext } from "@/utils/context/calendar";
+import { DataProvider } from "@/utils/context/data";
 import useRoleUser from "@/utils/hook/useRoleUser";
 import { useState } from "react";
 
 export default function Home() {
   return (
-    <CalendarProvider>
-      <Layout /> 
-    </CalendarProvider>
+    <DataProvider>
+      <CalendarProvider>
+        <Layout /> 
+      </CalendarProvider>
+    </DataProvider>
   );
 }
 
