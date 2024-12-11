@@ -15,6 +15,12 @@ const getAll = async(req, res) => {
 
 const generatePlanning = async(req, res) => {
   const classId = req.params.classId;
+
+  const {start, end} = req.query;
+
+  if(!start || !end){
+    return res.status(400).json("Date de début et de fin manquantes");
+  }
   if(!checkUUID(classId)){
     return res.status(400).json("Identifiant de classe invalide");
   }
