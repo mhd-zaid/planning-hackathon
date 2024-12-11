@@ -26,6 +26,16 @@ export default function (connection) {
   Class.init(
     {
         id: { type: DataTypes.UUID, primaryKey: true },
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: false,
+            validate: {
+            notEmpty: {
+                msg: 'Le nom ne peut pas être vide.',
+            },
+            },
+        },
     },
     {
       sequelize: connection,
