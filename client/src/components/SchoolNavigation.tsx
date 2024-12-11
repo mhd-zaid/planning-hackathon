@@ -1,3 +1,5 @@
+import Logout from "./Logout";
+
 export default function SchoolNavigation() {
   return (
     <aside className="w-64 h-screen ">
@@ -11,6 +13,9 @@ export default function SchoolNavigation() {
             >
               Disponibilité
             </button>
+          </li>
+          <li>
+            <Logout />
           </li>
         </ul>
       </div>
