@@ -48,6 +48,7 @@ export default function (connection) {
                 },
             },
         },
+        color: { type: DataTypes.STRING },
     },
     {
       sequelize: connection,
