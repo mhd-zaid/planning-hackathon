@@ -109,7 +109,7 @@ export default function SchoolNavigation() {
                       >
                         <div className="font-bold">{classe.name}</div>
                         <p className="text-xs font-normal text-gray-500">
-                          Il reste 20 heures à placé
+                          Il reste 20 heures à placer
                         </p>
                       </label>
                     </div>
@@ -144,7 +144,7 @@ export default function SchoolNavigation() {
         <div>
           <ul className="space-y-2">
             <li>
-              <button onClick={() => setShowAdmin(!showAdmin)} className="w-full text-start p-2 rounded-lg bg-gray-800 text-white">Administration</button></li>
+              <button onClick={() => setShowAdmin(!showAdmin)} className="w-full text-start p-2 rounded-lg bg-second text-white">Administration</button></li>
             <li>
               <LogoutButton />
             </li>
