@@ -7,7 +7,7 @@ import IntervenantNavigation from "@/components/IntervenantNavigation";
 import SchoolNavigation from "@/components/SchoolNavigation";
 
 export default function useRoleUser() {
-  const role = RoleUser.SCHOOL;
+  const role = RoleUser.INTERVENANT;
 
   const renderCalendar = {
     [RoleUser.STUDENT]: <StudentCalendar />,
