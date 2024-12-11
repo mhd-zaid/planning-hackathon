@@ -36,8 +36,6 @@ const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
   });
   const schoolDaysClass = classOpeningDayInstances.map(day => day.toJSON());
 
-  console.log(schoolDaysClass);
-
   const teachersId = [];
   const subjectClassId = [];
 
