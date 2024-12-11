@@ -5,7 +5,6 @@ import frLocale from "@fullcalendar/core/locales/fr";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useState } from "react";
 import { useCalendarContext } from "@/utils/context/calendar";
-// import useCalendar from "@/utils/hook/useCalendar";
 
 interface Event {
   title: string;
@@ -23,14 +22,6 @@ export default function SchoolCalendar() {
   const { semesterRange } = useCalendarContext();
 
   const [events, setEvents] = useState<Array<Event>>([]);
-
-  // const events = [
-  //   {
-  //     title: "The Title",
-  //     start: "2024-12-01",
-  //     end: "2024-12-10",
-  //   },
-  // ];
 
   return (
     <FullCalendar
