@@ -1,9 +1,6 @@
-
-import Logout from "./Logout";
 // import { useCalendarContext } from "@/utils/context/calendar";
 // import { ChangeEvent, useState } from "react";
 import { ChangeEvent, useState } from "react";
-import FormInputSelect from "./InputSelect";
 import LogoutButton from "./Logout";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { useDataContext } from "@/utils/context/data";
@@ -19,7 +16,7 @@ export default function SchoolNavigation() {
 
   const { fillieres } = useDataContext();
 
-  const {setShowAdmin, showAdmin} = useCalendarContext();
+  const { setShowAdmin, showAdmin } = useCalendarContext();
 
   const [selectedFilliere, setSelectedFilliere] = useState<string>("");
 
@@ -66,85 +63,90 @@ export default function SchoolNavigation() {
         <div>
           <h1 className="text-4xl font-bold text-center mb-5">Ecole</h1>
           <label
-          htmlFor="filliere"
-          className="block mb-2 text-sm font-medium text-gray-900 "
-        >
-          Sélectionner une filière
-        </label>
-        <select
-          id="filliere"
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-          onChange={(e) => setSelectedFilliere(e.target.value)}
-        >
-          <option value={""}>Choisir une fillière</option>
-          {fillieres.map((filliere) => (
-            <option key={filliere.id} value={filliere.id}>
-              {filliere.name}
-            </option>
-          ))}
-        </select>
+            htmlFor="filliere"
+            className="block mb-2 text-sm font-medium text-gray-900 "
+          >
+            Sélectionner une filière
+          </label>
+          <select
+            id="filliere"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+            onChange={(e) => setSelectedFilliere(e.target.value)}
+          >
+            <option value={""}>Choisir une fillière</option>
+            {fillieres.map((filliere) => (
+              <option key={filliere.id} value={filliere.id}>
+                {filliere.name}
+              </option>
+            ))}
+          </select>
 
-        {classesFromFilliere(selectedFilliere) && (
-          <>
-            <p className="block my-2 text-sm font-medium text-gray-900 ">
-              Choisir une classe
-            </p>
-            <ul>
-              {classesFromFilliere(selectedFilliere)?.map((classe) => (
-                <li key={classe.id}>
-                  <div className="flex p-2 rounded hover:bg-gray-100">
-                    <div className="flex items-center h-5">
-                      <input
-                        id={`input-index-${classe.name}`}
-                        type="radio"
-                        name="classe-radio"
-                        value={classe.id}
-                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
-                      />
+          {classesFromFilliere(selectedFilliere) && (
+            <>
+              <p className="block my-2 text-sm font-medium text-gray-900 ">
+                Choisir une classe
+              </p>
+              <ul>
+                {classesFromFilliere(selectedFilliere)?.map((classe) => (
+                  <li key={classe.id}>
+                    <div className="flex p-2 rounded hover:bg-gray-100">
+                      <div className="flex items-center h-5">
+                        <input
+                          id={`input-index-${classe.name}`}
+                          type="radio"
+                          name="classe-radio"
+                          value={classe.id}
+                          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div className="ms-2 text-sm">
+                        <label
+                          htmlFor={`input-index-${classe.name}`}
+                          className="font-medium text-gray-900"
+                        >
+                          <div className="font-bold">{classe.name}</div>
+                          <p className="text-xs font-normal text-gray-500">
+                            Il reste 20 heures à placé
+                          </p>
+                        </label>
+                      </div>
                     </div>
-                    <div className="ms-2 text-sm">
-                      <label
-                        htmlFor={`input-index-${classe.name}`}
-                        className="font-medium text-gray-900"
-                      >
-                        <div className="font-bold">{classe.name}</div>
-                        <p className="text-xs font-normal text-gray-500">
-                          Il reste 20 heures à placé
-                        </p>
-                      </label>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
 
-            <label
-              htmlFor="period"
-              className="block mb-2 text-sm font-medium text-gray-900 "
-            >
-              Sélectionner une période
-            </label>
-            <select
-              id="period"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-              onChange={onChangeSemester}
-            >
-              <option value="">Choisir une période</option>
-              {periodFromFilliere(selectedFilliere)?.map((period) => (
-                <option key={period.id} value={period.id}>
-                  Période du {new Date(period.beginDate).toLocaleDateString()}{" "}
-                  au {new Date(period.endDate).toLocaleDateString()}
-                </option>
-              ))}
-            </select>
-          </>
-        )}
-          
+              <label
+                htmlFor="period"
+                className="block mb-2 text-sm font-medium text-gray-900 "
+              >
+                Sélectionner une période
+              </label>
+              <select
+                id="period"
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                onChange={onChangeSemester}
+              >
+                <option value="">Choisir une période</option>
+                {periodFromFilliere(selectedFilliere)?.map((period) => (
+                  <option key={period.id} value={period.id}>
+                    Période du {new Date(period.beginDate).toLocaleDateString()}{" "}
+                    au {new Date(period.endDate).toLocaleDateString()}
+                  </option>
+                ))}
+              </select>
+            </>
+          )}
         </div>
         <div>
           <ul className="space-y-2">
             <li>
-              <button onClick={() => setShowAdmin(!showAdmin)} className="w-full text-start p-2 rounded-lg bg-gray-800 text-white">Administration</button></li>
+              <button
+                onClick={() => setShowAdmin(!showAdmin)}
+                className="w-full text-start p-2 rounded-lg bg-gray-800 text-white"
+              >
+                Administration
+              </button>
+            </li>
             <li>
               <LogoutButton />
             </li>

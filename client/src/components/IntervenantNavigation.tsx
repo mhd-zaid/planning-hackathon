@@ -1,12 +1,11 @@
 "use client";
 
-import Logout from "./Logout";
 import { useEffect, useState } from "react";
-import { useRouter } from 'vue-router';
-import { redirect } from 'next/navigation'
+import { redirect } from "next/navigation";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { ChangeEvent } from "react";
 import LogoutButton from "./Logout";
+import { useRouter } from "next/router";
 
 enum ValueSemester {
   SEMESTER_ONE = "1",
@@ -23,7 +22,7 @@ export default function IntervenantNavigation() {
     const loggedInUser = localStorage.getItem("loggedInUser");
 
     if (!loggedInUser) {
-      redirect('/login');
+      redirect("/login");
     } else {
       setUser(JSON.parse(loggedInUser));
     }
@@ -31,7 +30,7 @@ export default function IntervenantNavigation() {
 
   if (!user) {
     return <p>Chargement...</p>;
-  };
+  }
 
   const semesterOne = {
     start: "2024-01-01",
@@ -62,12 +61,18 @@ export default function IntervenantNavigation() {
       <div className="overflow-y-auto py-5 px-3 h-full bg-white border-r border-gray-200 flex flex-col justify-between">
         <div>
           <h1 className="text-4xl font-bold text-center mb-5">Intervenant</h1>
-          <p>Nom : {user.firstname}</p><br/>
-          <p>Matières :  </p><br />
-          <p>Taux horraires : </p><br />
+          {/* <p>Nom : {user.firstname}</p> */}
+          <br />
+          <p>Matières : </p>
+          <br />
+          <p>Taux horraires : </p>
+          <br />
           <ul className="space-y-2 flex flex-col">
             <li>
-              <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " defaultValue={""}>
+              <select
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                defaultValue={""}
+              >
                 <option value="" disabled>
                   Fillière
                 </option>
@@ -77,7 +82,10 @@ export default function IntervenantNavigation() {
               </select>
             </li>
             <li>
-              <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " defaultValue={""}>
+              <select
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                defaultValue={""}
+              >
                 <option value="" disabled>
                   Classe
                 </option>
@@ -88,7 +96,11 @@ export default function IntervenantNavigation() {
               </select>
             </li>
             <li>
-              <select className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " defaultValue={""} onChange={(e) => onChangeSemester(e)}>
+              <select
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                defaultValue={""}
+                onChange={(e) => onChangeSemester(e)}
+              >
                 <option value="" disabled>
                   Période
                 </option>
