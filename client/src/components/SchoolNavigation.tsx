@@ -1,44 +1,59 @@
-import { useCalendarContext } from "@/utils/context/calendar";
-import { ChangeEvent } from "react";
+// import { useCalendarContext } from "@/utils/context/calendar";
+// import { ChangeEvent, useState } from "react";
+import { useState } from "react";
+import FormInputSelect from "./InputSelect";
 
-enum ValueSemester {
-  SEMESTER_ONE = "1",
-  SEMESTER_TWO = "2",
-}
+// enum ValueSemester {
+//   SEMESTER_ONE = "1",
+//   SEMESTER_TWO = "2",
+// }
 
 export default function SchoolNavigation() {
-  const { setSemesterRange } = useCalendarContext();
+  // const { setSemesterRange } = useCalendarContext();
 
-  const semesterOne = {
-    start: "2024-01-01",
-    end: "2024-06-30",
-  };
+  // const semesterOne = {
+  //   start: "2024-01-01",
+  //   end: "2024-06-30",
+  // };
 
-  const semesterTwo = {
-    start: "2024-07-01",
-    end: "2024-12-31",
-  };
+  // const semesterTwo = {
+  //   start: "2024-07-01",
+  //   end: "2024-12-31",
+  // };
 
-  const onChangeSemester = (e: ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value as ValueSemester;
-    switch (value) {
-      case ValueSemester.SEMESTER_ONE:
-        setSemesterRange(semesterOne);
-        break;
-      case ValueSemester.SEMESTER_TWO:
-        setSemesterRange(semesterTwo);
-        break;
-      default:
-        break;
-    }
-  };
+  // const onChangeSemester = (e: ChangeEvent<HTMLSelectElement>) => {
+  //   const value = e.target.value as ValueSemester;
+  //   switch (value) {
+  //     case ValueSemester.SEMESTER_ONE:
+  //       setSemesterRange(semesterOne);
+  //       break;
+  //     case ValueSemester.SEMESTER_TWO:
+  //       setSemesterRange(semesterTwo);
+  //       break;
+  //     default:
+  //       break;
+  //   }
+  // };
+
+  const [selectedFilliere, setSelectedFilliere] = useState<string>("");
 
   return (
     <aside className="w-64 h-screen ">
       <div className="overflow-y-auto py-5 px-3 h-full bg-white border-r border-gray-200">
         <h1 className="text-4xl font-bold text-center mb-5">Ecole</h1>
 
-        <ul className="space-y-2">
+        <form className="space-y-2">
+          <FormInputSelect setSelectedFilliere={setSelectedFilliere} />
+          {selectedFilliere && (
+            <label
+              htmlFor="classroom"
+              className="block mb-2 text-sm font-medium text-gray-900 "
+            >
+              Choisir une classe
+            </label>
+          )}
+        </form>
+        {/* <ul className="space-y-2">
           <li>
             <select defaultValue={""}>
               <option value="" disabled>
@@ -69,7 +84,7 @@ export default function SchoolNavigation() {
               <option value="2">Semestre 2</option>
             </select>
           </li>
-        </ul>
+        </ul> */}
       </div>
     </aside>
   );

@@ -24,6 +24,14 @@ export default function SchoolCalendar() {
 
   const [events, setEvents] = useState<Array<Event>>([]);
 
+  // const events = [
+  //   {
+  //     title: "The Title",
+  //     start: "2024-12-01",
+  //     end: "2024-12-10",
+  //   },
+  // ];
+
   return (
     <FullCalendar
       plugins={[dayGridPlugin, timeGridWeek, interactionPlugin]}
@@ -31,11 +39,11 @@ export default function SchoolCalendar() {
       locale={frLocale}
       nowIndicator={true}
       height={"100%"}
-      selectable={true}
       dragScroll={true}
       events={events}
       editable={true}
       validRange={semesterRange || undefined}
+      selectable={!!semesterRange}
       select={(info) =>
         setEvents([
           ...events,
