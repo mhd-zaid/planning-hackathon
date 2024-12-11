@@ -13,33 +13,23 @@ export default function (connection) {
   Availability.init(
     {
       id: { type: DataTypes.UUID, primaryKey: true },
-      date: {
-        type: DataTypes.DATEONLY,
+      beginDate: {
+        type: DataTypes.DATE,
         allowNull: false,
         unique: false,
         validate: {
-          notEmpty: {
-            msg: 'La date ne peut pas être vide.',
-          },
+        notEmpty: {
+            msg: 'La date de début ne peut pas être vide.',
+        },
         },
       },
-      start: {
-        type: DataTypes.TIME,
+      endDate: {
+        type: DataTypes.DATE,
         allowNull: false,
         unique: false,
         validate: {
           notEmpty: {
-            msg: 'L\'heure de début ne peut pas être vide.',
-          },
-        },
-      },
-      end: {
-        type: DataTypes.TIME,
-        allowNull: false,
-        unique: false,
-        validate: {
-          notEmpty: {
-            msg: 'L\'heure de fin ne peut pas être vide.',
+            msg: 'La date de fin ne peut pas être vide.',
           },
         },
       },
