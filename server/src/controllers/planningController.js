@@ -18,9 +18,9 @@ const getPlanning = async (req, res) => {
 
     const planningService = new PlanningService();
     const datas = await getDataToGeneratePlanning(classId, start, end);
-
+    console.log(datas);
     const response = await planningService.getOpenAICompletion(datas);
-    res.status(200).send(response.choices[0].message);
+    res.status(200).send(response.choices[0].message.content);
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
