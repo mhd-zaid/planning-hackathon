@@ -111,6 +111,17 @@ export default function SchoolNavigation() {
                         </label>
                       </div>
                     </div>
+                    <div className="ms-2 text-sm">
+                      <label
+                        htmlFor={`input-index-${classe.name}`}
+                        className="font-medium text-gray-900"
+                      >
+                        <div className="font-bold">{classe.name}</div>
+                        <p className="text-xs font-normal text-gray-500">
+                          Il reste 20 heures à placer
+                        </p>
+                      </label>
+                    </div>
                   </li>
                 ))}
               </ul>
