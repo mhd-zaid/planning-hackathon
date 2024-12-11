@@ -1,41 +1,77 @@
 import React, { useState } from 'react';
+import { useRouter } from 'vue-router';
+import { redirect } from 'next/navigation'
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
 
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setMessage('Login link sent to your email!');
+      const response = await fetch('http://localhost:4000/api/users');
+      if (!response.ok) {
+        throw new Error('Impossible de récupérer les utilisateurs.');
+      }
+
+      const users = await response.json();
+      const user = users.find((u) => u.email === email);
+
+      if (user) {
+        setMessage(`Bienvenue, ${user.firstname} ${user.lastname} !`);
+        localStorage.setItem('loggedInUser', JSON.stringify(user));
+        setTimeout(() => {
+          redirect('/');
+        }, 2000);
       } else {
-        setMessage(data.error || 'Something went wrong.');
+        setMessage('Adresse email introuvable.');
       }
     } catch (error) {
       console.error('Error:', error);
-      setMessage('An error occurred.');
+      setMessage('Une erreur est survenue. Veuillez réessayer.');
     }
   };
 
     return(
-        <div>
-            <h2>Planning Hackathon</h2>
-            <div className="bg-white rounded-sm w-1/3 p-5 shadow-lg shadow-first-500/40">
-                <h2 className="text-first text-lg">Connectez-vous !</h2>
-                <form onSubmit={handleSubmit}>
-                    <input type="email" name="email" value={email}onChange={(e) => setEmail(e.target.value)} required />
-                    <button className="bg-second px-5 py-2 rounded-sm" type="submit">Se Connecter</button>
-                </form>
-                {message && <p>message</p>}
-            </div>
-        </div>
+      <div className="flex items-center justify-center h-screen bg-gray-100">
+      <div className="bg-white rounded-lg w-full max-w-lg p-8 shadow-lg">
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
+          Planning Hackathon
+        </h1>
+        <h3 className="text-lg text-center text-gray-600 mb-4">Connectez-vous !</h3>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Adresse Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full px-4 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-first focus:border-first"
+              placeholder="Entrez votre email"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-first text-white font-medium py-2 rounded-md hover:bg-second transition"
+          >
+            Se Connecter
+          </button>
+        </form>
+        {message && (
+          <p className="mt-4 text-center text-sm text-red-600">{message}</p>
+        )}
+      </div>
+    </div>
     );
 };
 
