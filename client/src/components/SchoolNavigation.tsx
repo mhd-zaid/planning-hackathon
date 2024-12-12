@@ -1,13 +1,18 @@
-import { ChangeEvent, useEffect } from "react";
+"use client";
+
+import { ChangeEvent, useEffect, useState } from "react";
 import LogoutButton from "./Logout";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { useDataContext } from "@/utils/context/data";
 import { Period } from "@/utils/types/period.interface";
+import useRoleUser from "@/utils/hook/useRoleUser";
 
 export default function SchoolNavigation() {
   const { setSemesterRange } = useCalendarContext();
 
   const { fillieres } = useDataContext();
+
+  const {role} = useRoleUser()
 
   const {
     setShowAdmin,
@@ -132,6 +137,10 @@ export default function SchoolNavigation() {
       setSelectedClassId(classes[0].id);
     }
   }, [selectedFilliere]);
+
+  if (!role) {
+    return <p>Chargement...</p>;
+  }
 
   return (
     <aside className="w-64 h-screen ">

@@ -18,6 +18,10 @@ export function Layout() {
   const { renderCalendar, renderNavigation, role } = useRoleUser();
   const { showAdmin } = useCalendarContext();
 
+  if (!role){
+    return null;
+  }
+
   return (
     <div className="flex gap-3">
         {renderNavigation[role]}

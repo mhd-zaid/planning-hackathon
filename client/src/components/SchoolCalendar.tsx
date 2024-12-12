@@ -1,3 +1,5 @@
+"use client"
+
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridWeek from "@fullcalendar/timegrid";

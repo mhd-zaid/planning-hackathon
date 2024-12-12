@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { ChangeEvent } from "react";
 import LogoutButton from "./Logout";
-import { useRouter } from "next/router";
+import useRoleUser from "@/utils/hook/useRoleUser";
 
 enum ValueSemester {
   SEMESTER_ONE = "1",
@@ -13,24 +13,9 @@ enum ValueSemester {
 }
 
 export default function IntervenantNavigation() {
-  const [user, setUser] = useState(null);
-  const router = useRouter();
-
   const { setSemesterRange } = useCalendarContext();
 
-  useEffect(() => {
-    const loggedInUser = localStorage.getItem("loggedInUser");
-
-    if (!loggedInUser) {
-      redirect("/login");
-    } else {
-      setUser(JSON.parse(loggedInUser));
-    }
-  }, [router]);
-
-  if (!user) {
-    return <p>Chargement...</p>;
-  }
+  const { role } = useRoleUser()
 
   const semesterOne = {
     start: "2024-01-01",
@@ -55,6 +40,10 @@ export default function IntervenantNavigation() {
         break;
     }
   };
+
+  if (!role) {
+    return <p>Chargement...</p>;
+  }
 
   return (
     <aside className="w-64 h-screen border-r border-second">
