@@ -1,6 +1,15 @@
+"use client";
+
 import LogoutButton from "./Logout";
+import useRoleUser from "@/utils/hook/useRoleUser";
 
 export default function StudentNavigation() {
+  const { role } = useRoleUser()
+
+  if (!role) {
+    return <p>Chargement...</p>;
+  }
+
   return (
     <aside className="w-64 h-screen ">
       <div className="overflow-y-auto py-5 px-3 h-full bg-white border-r border-gray-200 flex flex-col justify-between">

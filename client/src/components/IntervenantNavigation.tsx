@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { ChangeEvent } from "react";
 import LogoutButton from "./Logout";
-import { useRouter } from "next/router";
+import useRoleUser from "@/utils/hook/useRoleUser";
 
 enum ValueSemester {
   SEMESTER_ONE = "1",
@@ -13,24 +13,10 @@ enum ValueSemester {
 }
 
 export default function IntervenantNavigation() {
-  const [user, setUser] = useState(null);
-  const router = useRouter();
-
+  const [user, setUser] = useState();
   const { setSemesterRange } = useCalendarContext();
 
-  useEffect(() => {
-    const loggedInUser = localStorage.getItem("loggedInUser");
-
-    if (!loggedInUser) {
-      redirect("/login");
-    } else {
-      setUser(JSON.parse(loggedInUser));
-    }
-  }, [router]);
-
-  if (!user) {
-    return <p>Chargement...</p>;
-  }
+  const { role } = useRoleUser()
 
   const semesterOne = {
     start: "2024-01-01",
@@ -56,19 +42,21 @@ export default function IntervenantNavigation() {
     }
   };
 
+  if (!role) {
+    return <p>Chargement...</p>;
+  }
+
   return (
-    <aside className="w-64 h-screen border-r border-second">
-      <div className="overflow-y-auto py-5 px-3 h-full bg-white border-r border-gray-200 flex flex-col justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-center mb-5">Intervenant</h1>
-          {/* <p>Nom : {user.firstname}</p> */}
-          <br />
-          <p>Matières : </p>
-          <br />
-          <p>Taux horraires : </p>
-          <br />
-          <ul className="space-y-2 flex flex-col">
-            <li>
+    <div className="h-screen p-3 space-y-2 w-72 dark:bg-gray-50 dark:text-gray-800 border-r border-second flex flex-col justify-between">
+      <div>
+        <div className="flex items-center p-2 space-x-4">
+          <img src="https://source.unsplash.com/100x100/?portrait" alt="" className="w-12 h-12 rounded-full dark:bg-gray-500" />
+          <div>
+            <h2 className="text-lg font-semibold">Nom Prénom</h2>
+          </div>
+        </div>
+          <ul className="pt-2 pb-4 space-y-1 text-sm">
+            <li className="dark:bg-gray-100 dark:text-gray-900">
               <select
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                 defaultValue={""}
@@ -82,42 +70,44 @@ export default function IntervenantNavigation() {
               </select>
             </li>
             <li>
-              <select
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                defaultValue={""}
-              >
-                <option value="" disabled>
-                  Classe
-                </option>
-                <option value="iw">Classe 4A</option>
-                <option value="hack">Classe 4B</option>
-                <option value="market">Classe 5A</option>
-                <option value="market">Classe 5B</option>
-              </select>
+            <select
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                  defaultValue={""}
+                >
+                  <option value="" disabled>
+                    Classe
+                  </option>
+                  <option value="iw">Classe 4A</option>
+                  <option value="hack">Classe 4B</option>
+                  <option value="market">Classe 5A</option>
+                  <option value="market">Classe 5B</option>
+                </select>
             </li>
             <li>
-              <select
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                defaultValue={""}
-                onChange={(e) => onChangeSemester(e)}
-              >
-                <option value="" disabled>
-                  Période
-                </option>
-                <option value="1">Semestre 1</option>
-                <option value="2">Semestre 2</option>
-              </select>
+            <select
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                  defaultValue={""}
+                  onChange={(e) => onChangeSemester(e)}
+                >
+                  <option value="" disabled>
+                    Période
+                  </option>
+                  <option value="1">Semestre 1</option>
+                  <option value="2">Semestre 2</option>
+                </select>
             </li>
           </ul>
-        </div>
+      </div>
+      
+      <div>
         <div>
-          <ul className="space-y-2">
+          <ul className="pt-4 pb-2 space-y-1 text-sm">
             <li>
               <LogoutButton />
             </li>
           </ul>
         </div>
       </div>
-    </aside>
+    </div>
   );
 }

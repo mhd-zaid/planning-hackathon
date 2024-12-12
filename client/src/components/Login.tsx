@@ -1,9 +1,10 @@
 import React, { ChangeEvent, useState } from "react";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const router = useRouter();
 
   const handleSubmit = async (e: ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -19,12 +20,30 @@ const Login = () => {
 
       if (user) {
         localStorage.setItem("loggedInUser", JSON.stringify(user));
-        setTimeout(() => {
-          redirect("/");
-        }, 10);
+        switch (user.role) {
+          case "student":
+            router.push("/");
+            break;
+          case "professor":
+            router.push("/"); 
+            break;
+          case "manager":
+            router.push("/"); 
+            break;
+          default:
+            setMessage("Rôle inconnu. Veuillez contacter un administrateur.");
+        }
       } else {
         setMessage("Adresse email introuvable.");
       }
+      // if (user) {
+      //   localStorage.setItem("loggedInUser", JSON.stringify(user));
+      //   setTimeout(() => {
+      //     redirect("/");
+      //   }, 10);
+      // } else {
+      //   setMessage("Adresse email introuvable.");
+      // }
     } catch (error) {
       console.error("Error:", error);
       setMessage("Une erreur est survenue. Veuillez réessayer.");
