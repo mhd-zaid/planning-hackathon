@@ -2,23 +2,32 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridWeek from "@fullcalendar/timegrid";
 import frLocale from "@fullcalendar/core/locales/fr";
-import interactionPlugin from "@fullcalendar/interaction";
+import interactionPlugin, { DateClickArg } from "@fullcalendar/interaction";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { DateSelectArg, EventClickArg } from "@fullcalendar/core/index.js";
 import { useDataContext } from "@/utils/context/data";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { uuidv4 } from "uuidv7";
+import { init } from "next/dist/compiled/webpack/webpack";
+import ModalWorkHour from "./ModalWorkHour";
 
 export default function SchoolCalendar() {
-  const { semesterRange, events, setEvents, selectedClassId } =
-    useCalendarContext();
+  const {
+    semesterRange,
+    events,
+    setEvents,
+    selectedClassId,
+    showCalendarWorkHour,
+    workHourEvent,
+    setWorkhourEvent,
+  } = useCalendarContext();
 
   const { fillieres, schoolDays } = useDataContext();
 
   const headerToolbarProps = {
     left: "prev,next today",
     center: "title",
-    right: "dayGridMonth",
+    right: `${showCalendarWorkHour ? "timeGridWeek" : "dayGridMonth"}`,
   };
 
   const selectedClasse = fillieres
@@ -137,7 +146,7 @@ export default function SchoolCalendar() {
     }
   };
 
-  const dateClick = () => {
+  const dateClickSchoolDay = () => {
     if (!!!semesterRange) {
       alert("Veuillez sélectionner une période.");
     }
@@ -166,7 +175,7 @@ export default function SchoolCalendar() {
     }
   };
 
-  const selectDate = (event: DateSelectArg) => {
+  const selectDateSchoolDay = (event: DateSelectArg) => {
     const dateStart = new Date(event.startStr);
     const dateEnd = new Date(event.endStr);
 
@@ -183,12 +192,62 @@ export default function SchoolCalendar() {
     processSelectDateOnMultipleDays(event);
   };
 
+  const [eventWorkHour, setEventWorkHour] = useState<DateClickArg>();
+
+  const dateClickWorkHour = (eventWorkHour: DateClickArg) => {
+    setEventWorkHour(eventWorkHour);
+
+    setShowModal(true);
+
+    // setWorkhourEvent([
+    //   ...workHourEvent,
+    //   {
+    //     id: `NEW-${uuidv4()}`,
+    //     title: "Je suis dispo",
+    //     start: info.dateStr,
+    //     end: undefined,
+    //   },
+    // ]);
+  };
+
+  const [showModal, setShowModal] = useState<boolean>(false);
+
   useEffect(() => {
     fillEvents();
   }, [schoolDays]);
 
-  return (
+  return showCalendarWorkHour ? (
+    <>
+      <FullCalendar
+        key="workHour"
+        plugins={[dayGridPlugin, timeGridWeek, interactionPlugin]}
+        slotMinTime={"08:00:00"}
+        slotMaxTime={"18:00:00"}
+        slotDuration={"01:00:00"}
+        expandRows={true}
+        height={"100%"}
+        headerToolbar={headerToolbarProps}
+        locale={frLocale}
+        nowIndicator={true}
+        events={workHourEvent}
+        editable={true}
+        validRange={semesterRange || undefined}
+        selectable={!!semesterRange}
+        dateClick={dateClickWorkHour}
+        // eventClick={deleteSchoolDay}
+        // select={(info) => selectDateWorkHour(info)}
+        initialView="timeGridWeek"
+      />
+
+      <ModalWorkHour
+        showModal={showModal}
+        setShowModal={setShowModal}
+        eventWorkHour={eventWorkHour}
+      />
+    </>
+  ) : (
     <FullCalendar
+      key="dayGrid"
       plugins={[dayGridPlugin, timeGridWeek, interactionPlugin]}
       headerToolbar={headerToolbarProps}
       locale={frLocale}
@@ -198,9 +257,10 @@ export default function SchoolCalendar() {
       editable={true}
       validRange={semesterRange || undefined}
       selectable={!!semesterRange}
-      dateClick={dateClick}
+      dateClick={dateClickSchoolDay}
       eventClick={deleteSchoolDay}
-      select={selectDate}
+      select={selectDateSchoolDay}
+      initialView="dayGridMonth"
     />
   );
 }

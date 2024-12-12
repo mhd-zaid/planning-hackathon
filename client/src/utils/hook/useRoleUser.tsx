@@ -16,17 +16,15 @@ export default function useRoleUser() {
     // Récupérer les informations utilisateur depuis localStorage
     const loggedInUser = localStorage.getItem("loggedInUser");
 
-    if(!loggedInUser) {
-      setRole(null)
-      router.push("/login")
-      return
+    if (!loggedInUser) {
+      setRole(null);
+      router.push("/login");
+      return;
     }
 
     const user = JSON.parse(loggedInUser);
     setRole(user.role); // Définir le rôle en fonction de l'utilisateur connecté
   }, []);
-
-  console.log(role);
 
   const renderCalendar = {
     [RoleUser.student]: <StudentCalendar />,

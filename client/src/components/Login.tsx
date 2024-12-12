@@ -1,52 +1,37 @@
-import React, { ChangeEvent, useState } from "react";
-import { redirect, useRouter } from "next/navigation";
+import React, { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+import { User } from "@/utils/types/user.interface";
+import { useDataContext } from "@/utils/context/data";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const router = useRouter();
 
-  const handleSubmit = async (e: ChangeEvent<HTMLInputElement>) => {
+  const { users } = useDataContext();
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/users`);
-      if (!response.ok) {
-        throw new Error("Impossible de récupérer les utilisateurs.");
-      }
+    const user = users.find((u) => u.email === email);
 
-      const users = await response.json();
-      const user = users.find((u) => u.email === email);
-
-      if (user) {
-        localStorage.setItem("loggedInUser", JSON.stringify(user));
-        switch (user.role) {
-          case "student":
-            router.push("/");
-            break;
-          case "professor":
-            router.push("/"); 
-            break;
-          case "manager":
-            router.push("/"); 
-            break;
-          default:
-            setMessage("Rôle inconnu. Veuillez contacter un administrateur.");
-        }
-      } else {
-        setMessage("Adresse email introuvable.");
+    if (user) {
+      localStorage.setItem("loggedInUser", JSON.stringify(user));
+      switch (user.role) {
+        case "student":
+          router.push("/");
+          break;
+        case "professor":
+          router.push("/");
+          break;
+        case "manager":
+          router.push("/");
+          break;
+        default:
+          setMessage("Rôle inconnu. Veuillez contacter un administrateur.");
       }
-      // if (user) {
-      //   localStorage.setItem("loggedInUser", JSON.stringify(user));
-      //   setTimeout(() => {
-      //     redirect("/");
-      //   }, 10);
-      // } else {
-      //   setMessage("Adresse email introuvable.");
-      // }
-    } catch (error) {
-      console.error("Error:", error);
-      setMessage("Une erreur est survenue. Veuillez réessayer.");
+    } else {
+      setMessage("Adresse email introuvable.");
     }
   };
 

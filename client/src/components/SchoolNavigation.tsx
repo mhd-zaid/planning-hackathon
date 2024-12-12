@@ -8,7 +8,12 @@ import { Classes } from "@/utils/types/classes.interface";
 import useRoleUser from "@/utils/hook/useRoleUser";
 
 export default function SchoolNavigation() {
-  const { setSemesterRange } = useCalendarContext();
+  const {
+    setSemesterRange,
+    setEvents,
+    showCalendarWorkHour,
+    setShowCalendarWorkHour,
+  } = useCalendarContext();
   const { fillieres, fetchSchoolDays } = useDataContext();
 
   const { role } = useRoleUser();
@@ -172,6 +177,16 @@ export default function SchoolNavigation() {
     }
   }, [selectedClassId]);
 
+  useEffect(() => {
+    if (showCalendarWorkHour) {
+      setEvents([]);
+      setSelectedClassId("");
+      setSelectedFilliere("");
+    } else {
+      // Affiché les workHour
+    }
+  }, [showCalendarWorkHour]);
+
   if (!role) {
     return <p>Chargement...</p>;
   }
@@ -189,110 +204,125 @@ export default function SchoolNavigation() {
             <h2 className="text-lg font-semibold">Nom Prénom</h2>
           </div>
         </div>
-        <ul className="pt-2 pb-4 space-y-1 text-sm">
-          <li className="dark:bg-gray-100 dark:text-gray-900"></li>
-          <li>
-            <label
-              htmlFor="filliere"
-              className="block mb-2 text-sm font-medium text-gray-900 "
-            >
-              Sélectionner une filière
-            </label>
-            <select
-              id="filliere"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-              onChange={(e) => {
-                setSelectedFilliere(e.target.value);
-              }}
-            >
-              <option value={""}>Choisir une fillière</option>
-              {fillieres.map((filliere) => (
-                <option key={filliere.id} value={filliere.id}>
-                  {filliere.name}
-                </option>
-              ))}
-            </select>
+        {!showCalendarWorkHour && (
+          <ul className="pt-2 pb-4 space-y-1 text-sm">
+            <li className="dark:bg-gray-100 dark:text-gray-900"></li>
+            <li>
+              <label
+                htmlFor="filliere"
+                className="block mb-2 text-sm font-medium text-gray-900 "
+              >
+                Sélectionner une filière
+              </label>
+              <select
+                id="filliere"
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                onChange={(e) => {
+                  setSelectedFilliere(e.target.value);
+                }}
+              >
+                <option value={""}>Choisir une fillière</option>
+                {fillieres.map((filliere) => (
+                  <option key={filliere.id} value={filliere.id}>
+                    {filliere.name}
+                  </option>
+                ))}
+              </select>
 
-            {classes && (
-              <form onSubmit={submitForm}>
-                <p className="block my-2 text-sm font-medium text-gray-900 ">
-                  Choisir une classe
-                </p>
-                <ul>
-                  {classes?.map((classe) => (
-                    <li key={classe.id}>
-                      <div className="flex p-2 rounded hover:bg-gray-100">
-                        <div className="flex items-center h-5">
-                          <input
-                            id={`input-index-${classe.name}`}
-                            type="radio"
-                            name="classe-radio"
-                            value={classe.id}
-                            checked={selectedClassId === classe.id}
-                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
-                            onChange={(e) => {
-                              classe.restHour = calculHourAlreadyPlaced(
-                                classe,
-                                events
-                              );
-                              setSelectedClassId(e.target.value);
-                            }}
-                          />
+              {classes && !!selectedFilliere && (
+                <form onSubmit={submitForm}>
+                  <p className="block my-2 text-sm font-medium text-gray-900 ">
+                    Choisir une classe
+                  </p>
+                  <ul>
+                    {classes?.map((classe) => (
+                      <li key={classe.id}>
+                        <div className="flex p-2 rounded hover:bg-gray-100">
+                          <div className="flex items-center h-5">
+                            <input
+                              id={`input-index-${classe.name}`}
+                              type="radio"
+                              name="classe-radio"
+                              value={classe.id}
+                              checked={selectedClassId === classe.id}
+                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                              onChange={(e) => {
+                                classe.restHour = calculHourAlreadyPlaced(
+                                  classe,
+                                  events
+                                );
+                                setSelectedClassId(e.target.value);
+                              }}
+                            />
+                          </div>
+                          <div className="ms-2 text-sm">
+                            <label
+                              htmlFor={`input-index-${classe.name}`}
+                              className="font-medium text-gray-900"
+                            >
+                              <div className="font-bold">{classe.name}</div>
+                              {classe.restHour && (
+                                <p className="text-xs font-normal text-gray-500">
+                                  Il reste {classe.restHour} heures à placé
+                                </p>
+                              )}
+                            </label>
+                          </div>
                         </div>
-                        <div className="ms-2 text-sm">
-                          <label
-                            htmlFor={`input-index-${classe.name}`}
-                            className="font-medium text-gray-900"
-                          >
-                            <div className="font-bold">{classe.name}</div>
-                            {classe.restHour && (
-                              <p className="text-xs font-normal text-gray-500">
-                                Il reste {classe.restHour} heures à placé
-                              </p>
-                            )}
-                          </label>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                      </li>
+                    ))}
+                  </ul>
 
-                <label
-                  htmlFor="period"
-                  className="block mb-2 text-sm font-medium text-gray-900 "
-                >
-                  Sélectionner une période
-                </label>
-                <select
-                  id="period"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                  onChange={onChangeSemester}
-                >
-                  <option value="">Choisir une période</option>
-                  {periodFromFilliere(selectedFilliere)?.map((period) => (
-                    <option key={period.id} value={period.id}>
-                      Période du{" "}
-                      {new Date(period.beginDate).toLocaleDateString()} au{" "}
-                      {new Date(period.endDate).toLocaleDateString()}
-                    </option>
-                  ))}
-                </select>
+                  <label
+                    htmlFor="period"
+                    className="block mb-2 text-sm font-medium text-gray-900 "
+                  >
+                    Sélectionner une période
+                  </label>
+                  <select
+                    id="period"
+                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                    onChange={onChangeSemester}
+                  >
+                    <option value="">Choisir une période</option>
+                    {periodFromFilliere(selectedFilliere)?.map((period) => (
+                      <option key={period.id} value={period.id}>
+                        Période du{" "}
+                        {new Date(period.beginDate).toLocaleDateString()} au{" "}
+                        {new Date(period.endDate).toLocaleDateString()}
+                      </option>
+                    ))}
+                  </select>
 
-                <button
-                  type="submit"
-                  className="w-full text-center p-2 my-5 rounded-lg bg-first"
-                >
-                  Enregistrer les jours
-                </button>
-              </form>
-            )}
-          </li>
-        </ul>
+                  <button
+                    type="submit"
+                    className="w-full text-center p-2 my-5 rounded-lg bg-first"
+                  >
+                    Enregistrer les jours
+                  </button>
+                </form>
+              )}
+            </li>
+          </ul>
+        )}
       </div>
 
       <div>
         <div>
           <ul className="pt-4 pb-2 space-y-1 text-sm">
+            <li>
+              <button
+                rel="noopener noreferrer"
+                className="w-full flex items-center p-2 space-x-3 rounded-md bg-second hover:bg-second cursor-pointer"
+                onClick={() => setShowCalendarWorkHour(!showCalendarWorkHour)}
+              >
+                <span className="text-lg text-white">
+                  {showCalendarWorkHour
+                    ? "Placé jour de classe"
+                    : "Placé heure de cours"}
+                </span>
+              </button>
+            </li>
             <li>
               <a
                 rel="noopener noreferrer"
