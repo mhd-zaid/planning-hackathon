@@ -3,6 +3,7 @@ import LogoutButton from "./Logout";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { useDataContext } from "@/utils/context/data";
 import { Period } from "@/utils/types/period.interface";
+import { Event } from "@/utils/types/event.interface";
 
 export default function SchoolNavigation() {
   const { setSemesterRange } = useCalendarContext();
@@ -62,7 +63,39 @@ export default function SchoolNavigation() {
     });
   };
 
-  const submitForm = (e: React.FormEvent<HTMLFormElement>) => {
+  const getDatesBetween = (startDate: string, endDate: string) => {
+    const dates = [];
+    const currentDate = new Date(startDate);
+    const end = new Date(endDate);
+
+    while (currentDate <= end) {
+      dates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    return dates;
+  };
+
+  const formatEventsToDayDate = (events: Event[]) => {
+    const dates: { date: string }[] = events.flatMap((event) => {
+      if (!event.end) {
+        return [
+          {
+            date: event.start,
+          },
+        ];
+      } else {
+        const dates = getDatesBetween(event.start, event.end);
+        return dates.map((date) => ({
+          date: date.toISOString().split("T")[0],
+        }));
+      }
+    });
+
+    return dates;
+  };
+
+  const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!selectedClassId) {
       alert("Veuillez choisir une classe");
@@ -73,57 +106,26 @@ export default function SchoolNavigation() {
       return;
     }
 
-    const getDatesBetween = (startDate: string, endDate: string) => {
-      const dates = [];
-      const currentDate = new Date(startDate);
-      const end = new Date(endDate);
+    console.log(formatEventsToDayDate(events));
 
-      while (currentDate <= end) {
-        dates.push(new Date(currentDate));
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-
-      return dates;
+    const body = {
+      schoolDays: formatEventsToDayDate(events),
     };
 
-    const formattedEvents: { date: string }[] = events.map((event) => {
-      if (new Date(event.start).getDay === new Date(event.end).getDay) {
-        return {
-          date: event.start,
-        };
-      } else {
-        const dates = getDatesBetween(event.start, event.end);
-        console.log("dates", dates);
-        return {
-          date: "",
-        };
-        // Ici je dois récupérer tout les jours entre le jours de début inclus et le jours de fin inclus
-        // const dates = getDatesBetween(event.start, event.end);
-        // return dates.map((date) => ({
-        //   start: date.toISOString(),
-        //   end: date.toISOString(),
-        // }));
-      }
-    });
-
-    formattedEvents.forEach(async (event) => {
-      try {
-        await fetch(
-          `${process.env.NEXT_PUBLIC_URL_API}/school-days/${selectedClassId}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              date: event.date,
-            }),
-          }
-        );
-      } catch (error) {
-        console.log("error", error);
-      }
-    });
+    try {
+      await fetch(
+        `${process.env.NEXT_PUBLIC_URL_API}/school-days/${selectedClassId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        }
+      );
+    } catch (error) {
+      console.log("error", error);
+    }
   };
 
   useEffect(() => {
@@ -188,17 +190,6 @@ export default function SchoolNavigation() {
                           </p>
                         </label>
                       </div>
-                    </div>
-                    <div className="ms-2 text-sm">
-                      <label
-                        htmlFor={`input-index-${classe.name}`}
-                        className="font-medium text-gray-900"
-                      >
-                        <div className="font-bold">{classe.name}</div>
-                        <p className="text-xs font-normal text-gray-500">
-                          Il reste 20 heures à placer
-                        </p>
-                      </label>
                     </div>
                   </li>
                 ))}
