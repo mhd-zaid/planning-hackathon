@@ -3,7 +3,8 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridWeek from "@fullcalendar/timegrid";
 import frLocale from "@fullcalendar/core/locales/fr";
 import interactionPlugin from "@fullcalendar/interaction";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useDataContext } from "@/utils/context/data";
 import { useCalendarContext } from "@/utils/context/calendar";
 
 interface Event {
@@ -19,9 +20,34 @@ export default function IntervenantCalendar() {
     right: "timeGridWeek dayGridMonth",
   };
 
-  const { semesterRange } = useCalendarContext();
+  const { schoolDays, fetchSchoolDays } = useDataContext();
 
-  const [events, setEvents] = useState<Array<Event>>([]);
+  const { semesterRange,setEvents, events, selectedClassId } = useCalendarContext();
+
+  // const [events, setEvents] = useState<Array<Event>>([]);
+
+  const fillEvents = () => {
+    setEvents([]);
+    schoolDays.forEach((schoolDay) => {
+      const event = {
+        id: schoolDay.id,
+        title: schoolDay.class.name,
+        start: schoolDay.date,
+        end: undefined,
+      };
+
+      setEvents((prev) => [...prev, event]);
+    });
+  };
+
+  useEffect(() => {
+    fillEvents();
+    console.log('ici', schoolDays)
+  }, [schoolDays]);
+
+  useEffect(() => {
+    fetchSchoolDays(selectedClassId)
+  }, []);
 
   return (
     <FullCalendar
@@ -45,7 +71,7 @@ export default function IntervenantCalendar() {
       select={(info) =>
         setEvents([
           ...events,
-          { title: "Jour dispo", start: info.startStr, end: info.endStr },
+          { id: 'test', title: "Jour dispo", start: info.startStr, end: info.endStr },
         ])
       }
     />
