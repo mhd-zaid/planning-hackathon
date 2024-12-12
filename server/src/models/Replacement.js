@@ -16,6 +16,11 @@ export default function (connection) {
           foreignKey: 'subjectClassId',
           as: 'subjectClass',
         });
+
+        db.Replacement.belongsTo(db.SchoolDayClass, {
+          foreignKey: 'schoolDayClassId',
+          as: 'schoolDayClass',
+        });
     }
   }
 

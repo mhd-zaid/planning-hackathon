@@ -206,6 +206,7 @@ const deleteWorkHour = async (req, res) => {
           teacherId: subjectClass.teacherId,
           unavailabilityId: unavailability.id,
           subjectClassId: subjectClass.id,
+          schoolDayClassId: workHour.schoolDayClassId,
         });
       }
     }
