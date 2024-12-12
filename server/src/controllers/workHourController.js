@@ -158,7 +158,7 @@ const deleteWorkHour = async (req, res) => {
       // Filtrage progressif des `subjectClass`
       for (const subjectClass of [...subjectClasses]) {
         const teacherId = subjectClass.teacherId;
-        console.log(teacherId);
+
         // Si le subjectClass a déjà atteint son quota d'heures, exclure la `subjectClass`
         const subjectRemainingHours = backlogs.find((b) => b.id === subjectClass.id).subjectRemainingHours;
         if (subjectRemainingHours <= 0) {
