@@ -57,7 +57,6 @@ const create = async(req, res) => {
         }
 
         const dateWorkHour = new Date(workHour.beginDate);
-        console.log(dateWorkHour)
         const schoolDayClass = await db.SchoolDayClass.findOne({
           where: {
             date: dateWorkHour,
