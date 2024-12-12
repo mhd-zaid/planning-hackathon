@@ -4,6 +4,7 @@ import schoolDayRoutes from '../routes/schoolDays.js';
 import branchRoutes from '../routes/branch.js';
 import availabilityRoutes from "../routes/availability.js";
 import planningRoutes from "../routes/planning.js";
+import workHourRoutes from "../routes/workHour.js";
 
 export default (app, express) => {  
   app.use('/api/users', userRoutes(express.Router()));
@@ -12,4 +13,5 @@ export default (app, express) => {
   app.use('/api/branches', branchRoutes(express.Router()));
   app.use('/api/availabilities', availabilityRoutes(express.Router()));
   app.use('/api/plannings', planningRoutes(express.Router()));
+  app.use('/api/work-hours', workHourRoutes(express.Router()));
 };
