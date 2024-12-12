@@ -145,8 +145,6 @@ const getBacklog = async (req, res) => {
       return res.status(404).json("Classe introuvable");
     }
 
-    const backlogs = [];
-
     const periodInstances = await db.Period.findOne({
       where: {
         beginDate: {
@@ -179,26 +177,7 @@ const getBacklog = async (req, res) => {
       ],
     });
 
-    for (const subjectClass of subjectClassInstances) {
-      const subjectQuota = subjectClass.subject.nbHoursQuota;
-      const subjectName = subjectClass.subject.name;
-      let subjectHoursScheduled = 0;
-
-      for (const workHour of subjectClass.workHours) {
-        const beginDate = new Date(workHour.beginDate);
-        const endDate = new Date(workHour.endDate);
-        const diff = endDate - beginDate;
-        const hours = diff / 1000 / 60 / 60;
-        subjectHoursScheduled += hours;
-      }
-      backlogs.push({
-        id: subjectClass.id,
-        subjectName: subjectName,
-        subjectQuota: subjectQuota,
-        subjectHoursScheduled: subjectHoursScheduled,
-        subjectRemainingHours: subjectQuota - subjectHoursScheduled
-      });
-    }
+    const backlogs = calculateBacklog(subjectClassInstances);
 
     return res.status(200).json(backlogs);
 
@@ -206,5 +185,31 @@ const getBacklog = async (req, res) => {
     return res.status(500).send({ message: error.message });
   }
 }
+
+const calculateBacklog = (subjectClassInstances) => {
+  const backlogs = [];
+
+  for (const subjectClass of subjectClassInstances) {
+    const subjectQuota = subjectClass.subject.nbHoursQuota;
+    const subjectName = subjectClass.subject.name;
+    let subjectHoursScheduled = 0;
+
+    for (const workHour of subjectClass.workHours) {
+      const beginDate = new Date(workHour.beginDate);
+      const endDate = new Date(workHour.endDate);
+      const diff = endDate - beginDate;
+      const hours = diff / 1000 / 60 / 60;
+      subjectHoursScheduled += hours;
+    }
+    backlogs.push({
+      id: subjectClass.id,
+      subjectName: subjectName,
+      subjectQuota: subjectQuota,
+      subjectHoursScheduled: subjectHoursScheduled,
+      subjectRemainingHours: subjectQuota - subjectHoursScheduled
+    });
+  }
+  return backlogs;
+}
   
-export default {getPlanning, getBacklog};
+export default {getPlanning, getBacklog, calculateBacklog};

@@ -2,6 +2,7 @@ import db from "../models/index.js";
 import { uuidv4 } from "uuidv7";
 import { Op } from "sequelize";
 import { checkUUID } from "../utils/uuid.js";
+import planningController from "./planningController.js";
 
 const create = async (req, res) => {
   try {
@@ -131,17 +132,39 @@ const deleteWorkHour = async (req, res) => {
         subjectClassId: workHour.subjectClassId,
       });
 
+
       // Étape 1 : Récupérer toutes les `subjectClass` de la classe
       let subjectClasses = await db.SubjectClass.findAll({
         where: {
           classId: workHour.subjectClass.classId,
           teacherId: { [Op.ne]: workHour.subjectClass.teacherId },
         },
+        include: [
+          {
+            model: db.Subject,
+            as: 'subject',
+            attributes: ['name', 'nbHoursQuota']
+          },
+          {
+            model: db.WorkHour,
+            as: 'workHours',
+            attributes: ['beginDate', 'endDate']
+          }
+        ],
       });
+
+      const backlogs = planningController.calculateBacklog(subjectClasses);
     
       // Filtrage progressif des `subjectClass`
       for (const subjectClass of [...subjectClasses]) {
         const teacherId = subjectClass.teacherId;
+        console.log(teacherId);
+        // Si le subjectClass a déjà atteint son quota d'heures, exclure la `subjectClass`
+        const subjectRemainingHours = backlogs.find((b) => b.id === subjectClass.id).subjectRemainingHours;
+        if (subjectRemainingHours <= 0) {
+          subjectClasses = subjectClasses.filter((sc) => sc.id !== subjectClass.id);
+          continue;
+        }
     
         // Étape 2 : Vérifier si l'enseignant est disponible pour les heures
         const availability = await db.Availability.findOne({
