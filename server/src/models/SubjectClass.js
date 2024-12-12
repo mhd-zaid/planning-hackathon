@@ -23,6 +23,10 @@ export default function (connection) {
             foreignKey: 'roomId',
             as: 'rooms',
         });
+        db.SubjectClass.hasMany(db.WorkHour, {
+            foreignKey: 'subjectClassId',
+            as: 'workHours',
+        });
     }
   }
 
