@@ -31,16 +31,16 @@ const create = async(req, res) => {
         const isOverlapping = await db.WorkHour.findOne({
           where: {
             [Op.and]: [
-              { beginDate: { [Op.lt]: workHour.endDate } },  // Vérifie que l'heure de début de la nouvelle plage est avant la fin de l'existante
-              { endDate: { [Op.gt]: workHour.beginDate } }   // Vérifie que l'heure de fin de la nouvelle plage est après le début de l'existante
+              { beginDate: { [Op.lt]: workHour.endDate } },
+              { endDate: { [Op.gt]: workHour.beginDate } }
             ],
           },
           include: [
             {
-              model: db.SubjectClass,  // Jointure avec SubjectClass pour vérifier la relation avec le professeur
+              model: db.SubjectClass, 
               as: 'subjectClass',
               where: {
-                teacherId: workHour.teacherId,  // Filtre sur le teacherId du professeur pour récupérer ses horaires de travail
+                teacherId: subjectClassExist.teacherId,
               },
             }
           ]
@@ -55,12 +55,30 @@ const create = async(req, res) => {
           });
           continue;
         }
+
+        const dateWorkHour = new Date(workHour.beginDate);
+        console.log(dateWorkHour)
+        const schoolDayClass = await db.SchoolDayClass.findOne({
+          where: {
+            date: dateWorkHour,
+            classId: subjectClassExist.classId,
+          },
+        });
+
+        if (!schoolDayClass) {
+          workHourError.push({
+            ...workHour,
+            message: 'La date de classe n\'existe pas.'
+          });
+          continue;
+        }
   
         const newWorkHour = await db.WorkHour.create({
           id: uuidv4(),
           beginDate: workHour.beginDate,
           endDate: workHour.endDate,
           subjectClassId,
+          schoolDayClassId: schoolDayClass.id,
         });
 
         workHourSuccess.push(newWorkHour);
