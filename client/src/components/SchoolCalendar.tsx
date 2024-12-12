@@ -6,11 +6,13 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { DateSelectArg } from "@fullcalendar/core/index.js";
 import { useDataContext } from "@/utils/context/data";
+import { useEffect } from "react";
 
 export default function SchoolCalendar() {
   const { semesterRange, events, setEvents, selectedClassId } =
     useCalendarContext();
-  const { fillieres } = useDataContext();
+
+  const { fillieres, schoolDays } = useDataContext();
 
   const headerToolbarProps = {
     left: "prev,next today",
@@ -21,6 +23,19 @@ export default function SchoolCalendar() {
   const selectedClasse = fillieres
     .flatMap((filliere) => filliere.classes)
     .find((classe) => classe.id === selectedClassId);
+
+  const fillEvents = () => {
+    setEvents([]);
+    schoolDays.forEach((schoolDay) => {
+      const event = {
+        title: schoolDay.class.name,
+        start: new Date(schoolDay.date).toISOString(),
+        end: undefined,
+      };
+
+      setEvents((prev) => [...prev, event]);
+    });
+  };
 
   const eventsOverlap = (
     dateStartNewEvent: string,
@@ -135,6 +150,10 @@ export default function SchoolCalendar() {
     processSelectDateOnMultipleDays(event);
   };
 
+  useEffect(() => {
+    fillEvents();
+  }, [schoolDays]);
+
   return (
     <FullCalendar
       plugins={[dayGridPlugin, timeGridWeek, interactionPlugin]}
@@ -147,11 +166,17 @@ export default function SchoolCalendar() {
       validRange={semesterRange || undefined}
       selectable={!!semesterRange}
       dateClick={() =>
-        !!!semesterRange && alert("Veuillez sélectionner une période")
+        !!!semesterRange && alert("Veuillez sélectionner une période.")
       }
-      eventClick={(e) =>
-        setEvents(events.filter((event) => event.title !== e.event._def.title))
-      }
+      eventClick={(e) => {
+        if (!!!semesterRange) {
+          alert(
+            "Veuillez sélectionner une période pour modifier le calendrier."
+          );
+          return;
+        }
+        setEvents(events.filter((event) => event.title !== e.event._def.title));
+      }}
       select={selectDate}
     />
   );

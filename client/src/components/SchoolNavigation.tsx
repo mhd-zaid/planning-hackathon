@@ -8,7 +8,7 @@ import { Event } from "@/utils/types/event.interface";
 export default function SchoolNavigation() {
   const { setSemesterRange } = useCalendarContext();
 
-  const { fillieres } = useDataContext();
+  const { fillieres, fetchSchoolDays } = useDataContext();
 
   const {
     setShowAdmin,
@@ -134,6 +134,12 @@ export default function SchoolNavigation() {
       setSelectedClassId(classes[0].id);
     }
   }, [selectedFilliere]);
+
+  useEffect(() => {
+    if (!!selectedClassId) {
+      fetchSchoolDays(selectedClassId);
+    }
+  }, [selectedClassId]);
 
   return (
     <aside className="w-64 h-screen ">

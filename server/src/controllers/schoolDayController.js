@@ -17,6 +17,12 @@ const getAll = async (req, res) => {
         where: {
           classId: req.params.classId,
         },
+        include: [
+          {
+            model: db.Class,
+            as: "class",
+          },
+        ],
       });
 
       return res.status(200).json(schoolDays);
