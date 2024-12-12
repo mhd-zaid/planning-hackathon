@@ -13,6 +13,10 @@ interface CalendarContextType {
   setSelectedFilliere: React.Dispatch<React.SetStateAction<string>>;
   selectedClassId: string;
   setSelectedClassId: React.Dispatch<React.SetStateAction<string>>;
+  showCalendarWorkHour: boolean;
+  setShowCalendarWorkHour: React.Dispatch<React.SetStateAction<boolean>>;
+  workHourEvent: Event[];
+  setWorkhourEvent: React.Dispatch<React.SetStateAction<Event[]>>;
 }
 
 const CalendarContext = createContext<CalendarContextType>({
@@ -26,6 +30,10 @@ const CalendarContext = createContext<CalendarContextType>({
   setSelectedFilliere: () => {},
   selectedClassId: "",
   setSelectedClassId: () => {},
+  showCalendarWorkHour: false,
+  setShowCalendarWorkHour: () => {},
+  workHourEvent: [],
+  setWorkhourEvent: () => {},
 });
 
 export const CalendarProvider = ({
@@ -42,6 +50,8 @@ export const CalendarProvider = ({
 
   const [selectedFilliere, setSelectedFilliere] = useState<string>("");
   const [selectedClassId, setSelectedClassId] = useState<string>("");
+  const [showCalendarWorkHour, setShowCalendarWorkHour] = useState(false);
+  const [workHourEvent, setWorkhourEvent] = useState<Event[]>([]);
 
   const value = {
     semesterRange,
@@ -54,6 +64,10 @@ export const CalendarProvider = ({
     setSelectedFilliere,
     selectedClassId,
     setSelectedClassId,
+    showCalendarWorkHour,
+    setShowCalendarWorkHour,
+    workHourEvent,
+    setWorkhourEvent,
   };
 
   return (

@@ -15,10 +15,10 @@ export default function useRoleUser() {
   useEffect(() => {
     const loggedInUser = localStorage.getItem("loggedInUser");
 
-    if(!loggedInUser) {
-      setRole(null)
-      router.push("/login")
-      return
+    if (!loggedInUser) {
+      setRole(null);
+      router.push("/login");
+      return;
     }
 
     const user = JSON.parse(loggedInUser);

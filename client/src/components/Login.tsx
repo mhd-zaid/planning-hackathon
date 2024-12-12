@@ -1,8 +1,8 @@
 import React, { ChangeEvent, FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import getUsers from "@/utils/api/getUsers";
 import { User } from "@/utils/types/user.interface";
 import { useDataContext } from "@/utils/context/data";
-import getUsers from "@/utils/api/getUsers";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -10,11 +10,11 @@ const Login = () => {
   const router = useRouter();
 
   // const { users } = useDataContext();
+  const { users } = useDataContext();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const users = await getUsers();
     const user = users.find((u) => u.email === email);
 
     if (user) {
@@ -32,39 +32,8 @@ const Login = () => {
         default:
           setMessage("Rôle inconnu. Veuillez contacter un administrateur.");
       }
-
-      const users = await response.json();
-      const user = users.find((u) => u.email === email);
-
-      if (user) {
-        localStorage.setItem("loggedInUser", JSON.stringify(user));
-        switch (user.role) {
-          case "student":
-            router.push("/");
-            break;
-          case "professor":
-            router.push("/"); 
-            break;
-          case "manager":
-            router.push("/"); 
-            break;
-          default:
-            setMessage("Rôle inconnu. Veuillez contacter un administrateur.");
-        }
-      } else {
-        setMessage("Adresse email introuvable.");
-      }
-      // if (user) {
-      //   localStorage.setItem("loggedInUser", JSON.stringify(user));
-      //   setTimeout(() => {
-      //     redirect("/");
-      //   }, 10);
-      // } else {
-      //   setMessage("Adresse email introuvable.");
-      // }
-    } catch (error) {
-      console.error("Error:", error);
-      setMessage("Une erreur est survenue. Veuillez réessayer.");
+    } else {
+      setMessage("Adresse email introuvable.");
     }
   };
 

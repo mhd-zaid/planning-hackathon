@@ -7,6 +7,12 @@ export default function (connection) {
             foreignKey: 'classId',
             as: 'class',
         });
+
+        db.SchoolDayClass.hasMany(db.WorkHour, {
+            foreignKey: 'schoolDayClassId',
+            as: 'workHours',
+            onDelete: 'CASCADE',
+        });
     }
   }
 

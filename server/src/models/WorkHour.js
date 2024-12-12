@@ -11,6 +11,12 @@ export default function (connection) {
             foreignKey: 'roomId',
             as: 'room',
         });
+
+        db.WorkHour.belongsTo(db.SchoolDayClass, {
+            foreignKey: 'schoolDayClassId',
+            as: 'schoolDayClass',
+            onDelete: 'CASCADE',
+        })
     }
   }
 
