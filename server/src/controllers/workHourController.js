@@ -1,11 +1,15 @@
 import db from '../models/index.js';
 import {uuidv4} from "uuidv7";
+import { Op } from 'sequelize';
 import { checkUUID } from '../utils/uuid.js';
 
 const create = async(req, res) => {
     try {
 
       const workHour = req.body;
+
+      console.log(workHour);
+
       const subjectClassId = req.params.subjectClassId;
 
       if(!checkUUID(subjectClassId)) {
@@ -24,7 +28,23 @@ const create = async(req, res) => {
           return res
           .status(404)
           .json({ message: 'Ce cours pour cet intervenant n\'existe pas.' });
-      }        
+      }
+      
+      const isOverlapping = await db.WorkHour.findOne({
+        where: {
+          [Op.and]: [
+            { beginDate: { [Op.lt]: workHour.endDate } },  
+            { endDate: { [Op.gt]: workHour.beginDate } }
+          ]
+        }
+      });
+
+      if(isOverlapping) {
+        return res
+          .status(400)
+          .json({ message: 'Cet horaire est déjà pris.' });
+      }
+
 
       const newWorkHour = await db.WorkHour.create({
         id: uuidv4(),
