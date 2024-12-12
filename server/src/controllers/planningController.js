@@ -9,9 +9,9 @@ const getPlanning = async (req, res) => {
 
     const {start, end} = req.query;
 
-    // if(!start || !end){
-    //   return res.status(400).json("Date de début et de fin manquantes");
-    // }
+    if(!start || !end){
+      return res.status(400).json("Date de début et de fin manquantes");
+    }
     if(!checkUUID(classId)){
       return res.status(400).json("Identifiant de classe invalide");
     }
@@ -20,8 +20,8 @@ const getPlanning = async (req, res) => {
     const datas = await getDataToGeneratePlanning(classId, start, end);
     // console.log(datas);
     const response = await planningService.getOpenAICompletion(datas);
-    res.status(200).send(response.choices[0].message.content);
-    // return res.status(200).json(datas);
+    res.status(200).send(JSON.parse(response.choices[0].message.content));
+    //return res.status(200).json(datas);
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
@@ -29,10 +29,13 @@ const getPlanning = async (req, res) => {
 
 const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
 
-  // Récupérer les school day class between start and end date
   const classOpeningDayInstances = await db.SchoolDayClass.findAll({
     where: {
-      classId: classId
+      classId: classId,
+      date: {
+        [Op.between]: [startDate, endDate]
+      }
+      
     },
     attributes: ['date']
   });
@@ -42,12 +45,21 @@ const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
   const teachersId = [];
   const subjectClassId = [];
 
-  // Récupérer les subject class between start and end date
-  // on doit récupérer les subject class par rapport au mois courant et checker quel période est associé
-  // Mois de janvier => je recupere les subjectclass qui ont la période sur le mois de janvier
+  const periodInstances = await db.Period.findOne({
+    where: {
+      beginDate: {
+        [Op.lte]: startDate
+      },
+      endDate: {
+        [Op.gte]: endDate
+      }
+    },
+    attributes: ['id']
+  });
   const subjectClassInstances = await db.SubjectClass.findAll({
     where: {
-      classId: classId
+      classId: classId,
+      periodId : periodInstances.id
     },
     attributes: ['id'],
     include: [
@@ -73,7 +85,6 @@ const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
     return pureSubject;
   });
 
-  // Pour les workHours il faut tout récupérer pour la période donnée (s1, s2)
   const workHourInstances = await db.WorkHour.findAll({
     attributes: ['beginDate', 'endDate'],
     include: [
@@ -84,6 +95,7 @@ const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
           teacherId: {
             [Op.in]: teachersId, // Filtrer par les IDs des enseignants
           },
+          periodId: periodInstances.id,
         },
         attributes: ['id'],
         include: [

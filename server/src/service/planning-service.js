@@ -34,8 +34,8 @@ Based on the input data, generate a JSON object strictly in the following format
 3. A new potential work hour must be on a school working day (from schoolDaysClass).
 
 ### Example Output :
+- I have teachers, teachers have available hours between 10:00 and 18:00. School have school days on teacher's available hours. potentialWorkHours can be planned.
 - I have two teachers, John and Jane. John is available between 08:00 and 12:00 on Monday but he is also unavaible between 10:00 and 12:00. Jane is available between 15:00 and 18:00 on Monday. If i have a school day on monday, i can plan a course between 08:00 and 10:00 with John and between 15:00 and 18:00 with Jane.
-
 Use the input data to generate a JSON object strictly in the format specified above.
 `;
 
@@ -56,7 +56,7 @@ class PlanningService {
     const completion = await this.openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: context,
-        temperature: 0.2,
+        temperature: 0.1,
         frequency_penalty: 0,
         presence_penalty: 0,
         n: 1,
