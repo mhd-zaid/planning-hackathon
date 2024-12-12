@@ -1,28 +1,41 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getBranches } from "../api/getBranches";
+import { getBranches, getSchoolDaysByClass } from "../api/getBranches";
 import { Filliere } from "../types/filliere.interface";
+import { SchoolDays } from "../types/school-days.interface";
 
 interface DataContextType {
-  fetchBranches: () => void;
   fillieres: Filliere[];
+  schoolDays: SchoolDays[];
+  fetchBranches: () => void;
+  fetchSchoolDays: (idClass: string) => void;
 }
 
 const DataContext = createContext<DataContextType>({
-  fetchBranches: () => {},
   fillieres: [],
+  schoolDays: [],
+  fetchBranches: () => {},
+  fetchSchoolDays: () => {},
 });
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const [fillieres, setFillieres] = useState([]);
+  const [schoolDays, setSchoolDays] = useState([]);
 
   const fetchBranches = async () => {
     const filliere = await getBranches();
     setFillieres(filliere);
   };
 
+  const fetchSchoolDays = async (idClass: string) => {
+    const schoolDays = await getSchoolDaysByClass(idClass);
+    setSchoolDays(schoolDays);
+  };
+
   const value = {
-    fetchBranches,
     fillieres,
+    schoolDays,
+    fetchBranches,
+    fetchSchoolDays,
   };
 
   useEffect(() => {

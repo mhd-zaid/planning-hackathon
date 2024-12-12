@@ -36,7 +36,6 @@ export const CalendarProvider = ({
   const [semesterRange, setSemesterRange] = useState<SemesterRange | null>(
     null
   );
-
   const [events, setEvents] = useState<Event[]>([]);
 
   const [showAdmin, setShowAdmin] = useState(false);

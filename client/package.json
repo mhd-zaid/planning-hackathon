@@ -16,7 +16,8 @@
     "@fullcalendar/timegrid": "^6.1.15",
     "next": "15.0.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "uuidv7": "^1.0.2"
   },
   "devDependencies": {
     "@types/node": "^20",
