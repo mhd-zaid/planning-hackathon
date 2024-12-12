@@ -1,13 +1,13 @@
-import { ChangeEvent, useEffect } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import LogoutButton from "./Logout";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { useDataContext } from "@/utils/context/data";
 import { Period } from "@/utils/types/period.interface";
 import { Event } from "@/utils/types/event.interface";
+import { Classes } from "@/utils/types/classes.interface";
 
 export default function SchoolNavigation() {
   const { setSemesterRange } = useCalendarContext();
-
   const { fillieres, fetchSchoolDays } = useDataContext();
 
   const {
@@ -43,6 +43,29 @@ export default function SchoolNavigation() {
     }, [] as Period[]);
   };
 
+  const calculRestHour = (classe: Classes | undefined) => {
+    if (!classe) return 0;
+
+    const restHourByClasse = classe.subjectClasses.reduce((acc, current) => {
+      return (
+        acc + current.subject.nbHoursQuota + current.subject.nbHoursQuotaExam
+      );
+    }, 0);
+
+    return restHourByClasse;
+  };
+
+  const calculHourAlreadyPlaced = (classe: Classes, events: Event[]) => {
+    if (!events || !events.length) return 0;
+
+    const baseHour = calculRestHour(classe);
+
+    const HOUR_BY_DAY = 8;
+    const dayAlreadyPlaced = formatEventsToDayDate(events).length;
+
+    return baseHour - dayAlreadyPlaced * HOUR_BY_DAY;
+  };
+
   const onChangeSemester = (e: ChangeEvent<HTMLSelectElement>) => {
     const idPeriod = e.target.value;
 
@@ -68,7 +91,7 @@ export default function SchoolNavigation() {
     const currentDate = new Date(startDate);
     const end = new Date(endDate);
 
-    while (currentDate <= end) {
+    while (currentDate < end) {
       dates.push(new Date(currentDate));
       currentDate.setDate(currentDate.getDate() + 1);
     }
@@ -76,8 +99,12 @@ export default function SchoolNavigation() {
     return dates;
   };
 
-  const formatEventsToDayDate = (events: Event[]) => {
+  const formatEventsToDayDate = (events: Event[], formNew?: boolean) => {
     const dates: { date: string }[] = events.flatMap((event) => {
+      if (formNew && !event.id.startsWith("NEW-")) {
+        return [];
+      }
+
       if (!event.end) {
         return [
           {
@@ -107,7 +134,7 @@ export default function SchoolNavigation() {
     }
 
     const body = {
-      schoolDays: formatEventsToDayDate(events),
+      schoolDays: formatEventsToDayDate(events, true),
     };
 
     try {
@@ -126,10 +153,13 @@ export default function SchoolNavigation() {
     }
   };
 
+  const [classes, setClasses] = useState<Classes[]>();
+
   useEffect(() => {
     const classes = classesFromFilliere(selectedFilliere);
     if (classes && classes.length > 0) {
       setSelectedClassId(classes[0].id);
+      setClasses(classes);
     }
   }, [selectedFilliere]);
 
@@ -153,7 +183,9 @@ export default function SchoolNavigation() {
           <select
             id="filliere"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-            onChange={(e) => setSelectedFilliere(e.target.value)}
+            onChange={(e) => {
+              setSelectedFilliere(e.target.value);
+            }}
           >
             <option value={""}>Choisir une fillière</option>
             {fillieres.map((filliere) => (
@@ -163,13 +195,13 @@ export default function SchoolNavigation() {
             ))}
           </select>
 
-          {classesFromFilliere(selectedFilliere) && (
+          {classes && (
             <form onSubmit={submitForm}>
               <p className="block my-2 text-sm font-medium text-gray-900 ">
                 Choisir une classe
               </p>
               <ul>
-                {classesFromFilliere(selectedFilliere)?.map((classe) => (
+                {classes.map((classe) => (
                   <li key={classe.id}>
                     <div className="flex p-2 rounded hover:bg-gray-100">
                       <div className="flex items-center h-5">
@@ -180,7 +212,13 @@ export default function SchoolNavigation() {
                           value={classe.id}
                           checked={selectedClassId === classe.id}
                           className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
-                          onChange={(e) => setSelectedClassId(e.target.value)}
+                          onChange={(e) => {
+                            classe.restHour = calculHourAlreadyPlaced(
+                              classe,
+                              events
+                            );
+                            setSelectedClassId(e.target.value);
+                          }}
                         />
                       </div>
                       <div className="ms-2 text-sm">
@@ -189,9 +227,11 @@ export default function SchoolNavigation() {
                           className="font-medium text-gray-900"
                         >
                           <div className="font-bold">{classe.name}</div>
-                          <p className="text-xs font-normal text-gray-500">
-                            Il reste 20 heures à placé
-                          </p>
+                          {classe.restHour && (
+                            <p className="text-xs font-normal text-gray-500">
+                              Il reste {classe.restHour} heures à placé
+                            </p>
+                          )}
                         </label>
                       </div>
                     </div>

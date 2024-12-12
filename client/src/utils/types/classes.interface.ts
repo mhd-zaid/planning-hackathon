@@ -4,4 +4,5 @@ export interface Classes {
   id: string;
   name: string;
   subjectClasses: SubjectClasses[];
+  restHour?: number;
 }

@@ -31,7 +31,7 @@ export default function SchoolCalendar() {
       const event = {
         id: schoolDay.id,
         title: schoolDay.class.name,
-        start: new Date(schoolDay.date).toISOString(),
+        start: schoolDay.date,
         end: undefined,
       };
 
@@ -89,7 +89,7 @@ export default function SchoolCalendar() {
       setEvents([
         ...events,
         {
-          id: uuidv4(),
+          id: `NEW-${uuidv4()}`,
           title: selectedClasse?.name || "",
           start: event.startStr,
           end: undefined,
@@ -128,7 +128,7 @@ export default function SchoolCalendar() {
       setEvents([
         ...events,
         {
-          id: uuidv4(),
+          id: `NEW-${uuidv4()}`,
           title: selectedClasse?.name || "",
           start: event.startStr,
           end: event.endStr,

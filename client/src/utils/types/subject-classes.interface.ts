@@ -6,7 +6,7 @@ export interface SubjectClasses {
   id: string;
   classId: string;
   period: Period;
-  subject: Subject[];
+  subject: Subject;
   teacher: Teacher;
   createdAt: string;
   updatedAt: string;
