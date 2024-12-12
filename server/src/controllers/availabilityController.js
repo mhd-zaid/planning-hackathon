@@ -42,43 +42,19 @@ const create = async (req, res) => {
             return res.status(404).json({message: "L'utilisateur n'existe pas"});
         }
 
-        // const overlap = await db.Availability.findOne({
-        //     where: {
-        //         userId: req.params.userId,
-        //         [Op.or]: [
-        //             {
-        //                 start: {
-        //                     [Op.between]: [availability.start, availability.end]
-        //                 }
-        //             },
-        //             {
-        //                 end: {
-        //                     [Op.between]: [availability.start, availability.end]
-        //                 }
-        //             },
-        //             {
-        //                 [Op.and]: [
-        //                     {
-        //                         start: {
-        //                             [Op.lte]: availability.start
-        //                         }
-        //                     },
-        //                     {
-        //                         end: {
-        //                             [Op.gte]: availability.end
-        //                         }
-        //                     }
-        //                 ]
-        //             }
-        //         ]
-        //     }
-        // });
+        const overlap = await db.Availability.findOne({
+            where: {
+                userId: req.params.userId,
+                [Op.and]: [
+                    { beginDate: { [Op.lt]: availability.endDate } },  
+                    { endDate: { [Op.gt]: availability.beginDate } }
+                ]
+            }
+          });
 
-        // if (overlap) {
-        //     return res.status(400).json({message: "La disponibilité chevauche une autre disponibilité existante"});
-        // }
-
-        console.log(availability);
+        if (overlap) {
+            return res.status(400).json({message: "La disponibilité chevauche une autre disponibilité existante"});
+        }
 
         const newAvailability = await db.Availability.create({
             id: uuidv4(),
@@ -111,35 +87,13 @@ const update = async (req, res) => {
 
         const overlap = await db.Availability.findOne({
             where: {
-                userId: availabilityExist.userId,
-                [Op.or]: [
-                    {
-                        start: {
-                            [Op.between]: [availability.start, availability.end]
-                        }
-                    },
-                    {
-                        end: {
-                            [Op.between]: [availability.start, availability.end]
-                        }
-                    },
-                    {
-                        [Op.and]: [
-                            {
-                                start: {
-                                    [Op.lte]: availability.start
-                                }
-                            },
-                            {
-                                end: {
-                                    [Op.gte]: availability.end
-                                }
-                            }
-                        ]
-                    }
+                userId: req.params.userId,
+                [Op.and]: [
+                    { beginDate: { [Op.lt]: availability.endDate } },  
+                    { endDate: { [Op.gt]: availability.beginDate } }
                 ]
             }
-        });
+          });
 
         if (overlap && overlap.id !== availabilityExist.id) {
             return res.status(400).json({message: "La disponibilité chevauche une autre disponibilité existante"});
