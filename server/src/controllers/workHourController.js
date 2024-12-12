@@ -69,6 +69,9 @@ const create = async (req, res) => {
         continue;
       }
 
+      // Une room id doit être disponible sur la date de l'horaire
+      // affecter une room id à la workHour
+
       const newWorkHour = await db.WorkHour.create({
         id: uuidv4(),
         beginDate: workHour.beginDate,
