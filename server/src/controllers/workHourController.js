@@ -124,12 +124,67 @@ const deleteWorkHour = async (req, res) => {
 
     //create absence
     if (isUnavailable) {
-      await db.Unavailability.create({
+      const unavailability = await db.Unavailability.create({
         id: uuidv4(),
         date: workHour.beginDate,
         userId: workHour.subjectClass.teacherId,
         subjectClassId: workHour.subjectClassId,
       });
+
+      // Étape 1 : Récupérer toutes les `subjectClass` de la classe
+      let subjectClasses = await db.SubjectClass.findAll({
+        where: {
+          classId: workHour.subjectClass.classId,
+          teacherId: { [Op.ne]: workHour.subjectClass.teacherId },
+        },
+      });
+    
+      // Filtrage progressif des `subjectClass`
+      for (const subjectClass of [...subjectClasses]) {
+        const teacherId = subjectClass.teacherId;
+    
+        // Étape 2 : Vérifier si l'enseignant est disponible pour les heures
+        const availability = await db.Availability.findOne({
+          where: {
+            userId: teacherId,
+            beginDate: { [Op.lte]: workHour.beginDate },
+            endDate: { [Op.gte]: workHour.endDate },
+          },
+        });
+    
+        if (!availability) {
+          // Si indisponible, exclure la `subjectClass`
+          subjectClasses = subjectClasses.filter((sc) => sc.id !== subjectClass.id);
+          continue;
+        }
+    
+        // Étape 3 : Vérifier si l'enseignant a des heures de travail dans cet intervalle
+        const workHourInstances = await db.WorkHour.findAll({
+          where: {
+            subjectClassId: subjectClass.id,
+            beginDate: { [Op.gte]: workHour.beginDate },
+            endDate: { [Op.lte]: workHour.endDate },
+          },
+        });
+    
+        if (workHourInstances.length > 0) {
+          // Si des heures existent, exclure la `subjectClass`
+          subjectClasses = subjectClasses.filter((sc) => sc.id !== subjectClass.id);
+          continue;
+        }
+      }
+    
+      // Étape 4 : Créer des remplacements pour les `subjectClass` restants
+      for (const subjectClass of subjectClasses) {
+        await db.Replacement.create({
+          id: uuidv4(),
+          beginDate: workHour.beginDate,
+          endDate: workHour.endDate,
+          teacherId: subjectClass.teacherId,
+          unavailabilityId: unavailability.id,
+          subjectClassId: subjectClass.id,
+        });
+      }
     }
     return res.status(204).json();
   } catch (error) {

@@ -11,6 +11,11 @@ export default function (connection) {
             foreignKey: 'unavailabilityId',
             as: 'unavailability',
         });
+
+        db.Replacement.belongsTo(db.SubjectClass, {
+          foreignKey: 'subjectClassId',
+          as: 'subjectClass',
+        });
     }
   }
 
