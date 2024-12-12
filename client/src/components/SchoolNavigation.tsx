@@ -106,8 +106,6 @@ export default function SchoolNavigation() {
       return;
     }
 
-    console.log(formatEventsToDayDate(events));
-
     const body = {
       schoolDays: formatEventsToDayDate(events),
     };

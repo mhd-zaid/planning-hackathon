@@ -4,9 +4,10 @@ import timeGridWeek from "@fullcalendar/timegrid";
 import frLocale from "@fullcalendar/core/locales/fr";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useCalendarContext } from "@/utils/context/calendar";
-import { DateSelectArg } from "@fullcalendar/core/index.js";
+import { DateSelectArg, EventClickArg } from "@fullcalendar/core/index.js";
 import { useDataContext } from "@/utils/context/data";
 import { useEffect } from "react";
+import { uuidv4 } from "uuidv7";
 
 export default function SchoolCalendar() {
   const { semesterRange, events, setEvents, selectedClassId } =
@@ -28,6 +29,7 @@ export default function SchoolCalendar() {
     setEvents([]);
     schoolDays.forEach((schoolDay) => {
       const event = {
+        id: schoolDay.id,
         title: schoolDay.class.name,
         start: new Date(schoolDay.date).toISOString(),
         end: undefined,
@@ -87,6 +89,7 @@ export default function SchoolCalendar() {
       setEvents([
         ...events,
         {
+          id: uuidv4(),
           title: selectedClasse?.name || "",
           start: event.startStr,
           end: undefined,
@@ -125,11 +128,41 @@ export default function SchoolCalendar() {
       setEvents([
         ...events,
         {
+          id: uuidv4(),
           title: selectedClasse?.name || "",
           start: event.startStr,
           end: event.endStr,
         },
       ]);
+    }
+  };
+
+  const dateClick = () => {
+    if (!!!semesterRange) {
+      alert("Veuillez sélectionner une période.");
+    }
+  };
+
+  const deleteSchoolDay = async (e: EventClickArg) => {
+    if (!!!semesterRange) {
+      alert("Veuillez sélectionner une période pour modifier le calendrier");
+      return;
+    }
+
+    setEvents(events.filter((event) => event.id !== e.event._def.publicId));
+
+    try {
+      await fetch(
+        `${process.env.NEXT_PUBLIC_URL_API}/school-days/${e.event._def.publicId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -165,18 +198,8 @@ export default function SchoolCalendar() {
       editable={true}
       validRange={semesterRange || undefined}
       selectable={!!semesterRange}
-      dateClick={() =>
-        !!!semesterRange && alert("Veuillez sélectionner une période.")
-      }
-      eventClick={(e) => {
-        if (!!!semesterRange) {
-          alert(
-            "Veuillez sélectionner une période pour modifier le calendrier."
-          );
-          return;
-        }
-        setEvents(events.filter((event) => event.title !== e.event._def.title));
-      }}
+      dateClick={dateClick}
+      eventClick={deleteSchoolDay}
       select={selectDate}
     />
   );
