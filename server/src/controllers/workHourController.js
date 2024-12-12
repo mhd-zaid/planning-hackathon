@@ -6,55 +6,71 @@ import { checkUUID } from '../utils/uuid.js';
 const create = async(req, res) => {
     try {
 
-      const workHour = req.body;
+      const workHours = req.body;
 
-      console.log(workHour);
+      const workHourSuccess = [];
+      const workHourError = [];
 
-      const subjectClassId = req.params.subjectClassId;
+      for(const workHour of workHours){
+        const subjectClassId = workHour.subjectClassId;
 
-      if(!checkUUID(subjectClassId)) {
-        return res
-          .status(400)
-          .json({ message: 'Cet intervenant n\'enseigne pas ce cours.' });
-      }
+        const subjectClassExist = await db.SubjectClass.findOne({
+          where: {
+            id: subjectClassId,
+          },
+        });
 
-      const subjectClassExists = await db.SubjectClass.findOne({
-        where: {
-          id: subjectClassId,
-        },
-      });
-
-      if (!subjectClassExists) {
-          return res
-          .status(404)
-          .json({ message: 'Ce cours pour cet intervenant n\'existe pas.' });
-      }
-      
-      const isOverlapping = await db.WorkHour.findOne({
-        where: {
-          [Op.and]: [
-            { beginDate: { [Op.lt]: workHour.endDate } },  
-            { endDate: { [Op.gt]: workHour.beginDate } }
-          ]
+        if (!subjectClassExist) {
+          workHourError.push({
+            ...workHour,
+            message: 'La classe n\'existe pas.'
+        });
+          continue;
         }
-      });
 
-      if(isOverlapping) {
-        return res
-          .status(400)
-          .json({ message: 'Cet horaire est déjà pris.' });
+        const isOverlapping = await db.WorkHour.findOne({
+          where: {
+            [Op.and]: [
+              { beginDate: { [Op.lt]: workHour.endDate } },  // Vérifie que l'heure de début de la nouvelle plage est avant la fin de l'existante
+              { endDate: { [Op.gt]: workHour.beginDate } }   // Vérifie que l'heure de fin de la nouvelle plage est après le début de l'existante
+            ],
+          },
+          include: [
+            {
+              model: db.SubjectClass,  // Jointure avec SubjectClass pour vérifier la relation avec le professeur
+              as: 'subjectClass',
+              where: {
+                teacherId: workHour.teacherId,  // Filtre sur le teacherId du professeur pour récupérer ses horaires de travail
+              },
+            }
+          ]
+        });
+        
+        
+  
+        if(isOverlapping) {
+          workHourError.push({
+            ...workHour,
+            message: 'Les horaires se chevauchent.'
+          });
+          continue;
+        }
+  
+        const newWorkHour = await db.WorkHour.create({
+          id: uuidv4(),
+          beginDate: workHour.beginDate,
+          endDate: workHour.endDate,
+          subjectClassId,
+        });
+
+        workHourSuccess.push(newWorkHour);
       }
-
-
-      const newWorkHour = await db.WorkHour.create({
-        id: uuidv4(),
-        beginDate: workHour.beginDate,
-        endDate: workHour.endDate,
-        subjectClassId,
-      });
 
         
-      return res.status(201).json(newWorkHour);
+      return res.status(201).json({
+        workHourSuccess,
+        workHourError,
+      });
     } catch (error) {
       console.error("Une erreur s'est produite :", error);
       return res
