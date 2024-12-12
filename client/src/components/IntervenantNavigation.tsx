@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { redirect, useRouter } from "next/navigation";
 import { useCalendarContext } from "@/utils/context/calendar";
+import { useDataContext } from "@/utils/context/data";
 import { ChangeEvent } from "react";
 import LogoutButton from "./Logout";
 import useRoleUser from "@/utils/hook/useRoleUser";
@@ -46,16 +47,19 @@ export default function IntervenantNavigation() {
     return <p>Chargement...</p>;
   }
 
+  console.log(user);
+
   return (
     <div className="h-screen p-3 space-y-2 w-72 dark:bg-gray-50 dark:text-gray-800 border-r border-second flex flex-col justify-between">
       <div>
         <div className="flex items-center p-2 space-x-4">
           <img src="https://source.unsplash.com/100x100/?portrait" alt="" className="w-12 h-12 rounded-full dark:bg-gray-500" />
           <div>
-            <h2 className="text-lg font-semibold">Nom Prénom</h2>
+            <h2 className="text-lg font-semibold"></h2>
           </div>
         </div>
           <ul className="pt-2 pb-4 space-y-1 text-sm">
+            <li>Matière : </li>
             <li className="dark:bg-gray-100 dark:text-gray-900">
               <select
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "

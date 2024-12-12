@@ -148,7 +148,7 @@ export default function SchoolNavigation() {
         <div className="flex items-center p-2 space-x-4">
           <img src="https://source.unsplash.com/100x100/?portrait" alt="" className="w-12 h-12 rounded-full dark:bg-gray-500" />
           <div>
-            <h2 className="text-lg font-semibold">Nom Prénom</h2>
+            <h2 className="text-lg font-semibold"></h2>
           </div>
         </div>
           <ul className="pt-2 pb-4 space-y-1 text-sm">

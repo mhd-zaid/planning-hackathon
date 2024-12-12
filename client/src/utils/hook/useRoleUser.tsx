@@ -9,11 +9,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function useRoleUser() {
-  const [role, setRole] = useState(null); // Initialiser le rôle dynamiquement
+  const [role, setRole] = useState(null); 
   const router = useRouter();
 
   useEffect(() => {
-    // Récupérer les informations utilisateur depuis localStorage
     const loggedInUser = localStorage.getItem("loggedInUser");
 
     if(!loggedInUser) {
@@ -23,10 +22,8 @@ export default function useRoleUser() {
     }
 
     const user = JSON.parse(loggedInUser);
-    setRole(user.role); // Définir le rôle en fonction de l'utilisateur connecté
+    setRole(user.role);
   }, []);
-
-  console.log(role);
 
   const renderCalendar = {
     [RoleUser.student]: <StudentCalendar />,

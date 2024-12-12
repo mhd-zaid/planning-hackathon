@@ -26,6 +26,13 @@ export default function IntervenantCalendar() {
   return (
     <FullCalendar
       plugins={[dayGridPlugin, timeGridWeek, interactionPlugin]}
+      // slotMinTime="08:00:00"
+      // slotMaxTime="18:00:00"
+      // events={[
+      //   { title: 'Matinée', start: '2024-12-12T08:00:00', end: '2024-12-12T12:00:00' },
+      //   { title: 'Après-midi', start: '2024-12-12T13:00:00', end: '2024-12-12T18:00:00' },
+      // ]}
+      // slotDuration="00:30:00"
       headerToolbar={headerToolbarProps}
       locale={frLocale}
       nowIndicator={true}

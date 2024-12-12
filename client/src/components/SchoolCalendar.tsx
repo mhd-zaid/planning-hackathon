@@ -48,6 +48,7 @@ export default function SchoolCalendar() {
           title: selectedClasse?.name || "",
           start: info.startStr,
           end: info.endStr,
+          // display: "background",
         },
       ]);
     }
