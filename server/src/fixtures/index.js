@@ -176,7 +176,7 @@ const loadSubjectClasses = async () => {
           subjectId: subject.id,
           classId: cls.id,
           teacherId: professors[indexProfessor % professors.length].id,
-          periodId: periods[0].id, 
+          periodId: periods[1].id, 
         });
         indexProfessor++;
       });
