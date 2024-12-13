@@ -195,6 +195,14 @@ export default function SchoolNavigation() {
     return <p>Chargement...</p>;
   }
 
+  const handleWorkHoursValidated = () => {
+    getBacklog(selectedBacklog).then((data) => {
+      setBacklogs(data);
+    });
+    fetchStudentWorkHours(selectedBacklog);
+    console.log("Les heures de travail ont été validées.");
+  };
+
   return (
     <div className="h-screen p-3 space-y-2 w-72 dark:bg-gray-50 dark:text-gray-800 border-r border-second flex flex-col justify-between">
       <div>
@@ -331,7 +339,12 @@ export default function SchoolNavigation() {
           </ul>
         )}
 
-      <ModalGeneratePlanning isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} classId={selectedBacklog}/>
+      <ModalGeneratePlanning 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        classId={selectedBacklog}
+        onWorkHoursValidated={handleWorkHoursValidated}
+      />
 
         {displayedByRole === RoleUser.professor && (
           <>

@@ -6,9 +6,10 @@ interface ModalGeneratePlanningProps {
   isOpen: boolean;
   classId: string;
   onClose: () => void;
+  onWorkHoursValidated: () => void;
 }
 
-const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, onClose, classId }) => {
+const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, onClose, classId, onWorkHoursValidated }) => {
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [potentialWorkHours, setPotentialWorkHours] = useState<any[]>([]); // Tableau pour stocker les horaires potentiels récupérés
@@ -76,6 +77,7 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
       const data = await response.json();
       console.log("API Response:", data);
       toast.success("Les heures de travail ont été générées avec succès!");
+      onWorkHoursValidated();
       onClose(); // Fermer la modal après la validation
     } catch (error) {
       console.error("Erreur lors de la création des horaires:", error);
@@ -192,7 +194,7 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
               onClick={handleConfirm}
               disabled={isLoading}
             >
-              {isLoading ? <ClipLoader size={20} color="#fff" /> : "Valider"} {/* Spinner ici aussi */}
+              {isLoading ? <ClipLoader size={20} color="#fff" /> : "Valider"}
             </button>
           </div>
         )}
