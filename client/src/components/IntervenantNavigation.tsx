@@ -1,10 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { redirect, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { useDataContext } from "@/utils/context/data";
-import { ChangeEvent } from "react";
 import LogoutButton from "./Logout";
 import useRoleUser from "@/utils/hook/useRoleUser";
 import { User } from "@/utils/types/user.interface";
@@ -12,12 +10,10 @@ import { Classes } from "@/utils/types/classes.interface";
 import { Event } from "@/utils/types/event.interface";
 import { avaibilities } from "@/utils/types/avaibilities.interface";
 
-
 export default function IntervenantNavigation() {
-
-  const {classes, fetchSchoolDays} = useDataContext();
+  const { classes, fetchSchoolDays } = useDataContext();
   // const [user, setUser] = useState();
-  const { setSemesterRange, selectedClassId, setSelectedClassId, events } = useCalendarContext();
+  const { selectedClassId, setSelectedClassId, events } = useCalendarContext();
 
   const { role } = useRoleUser()
 
@@ -81,7 +77,7 @@ export default function IntervenantNavigation() {
   };
 
   const userstr = localStorage.getItem("loggedInUser");
-  const user : User = userstr && JSON.parse(userstr);
+  const user: User = userstr && JSON.parse(userstr);
 
   const formatAvaibilities = (newEvent: Event[]) => {
      const formatedEvent = newEvent.flatMap(event => 
@@ -140,11 +136,11 @@ export default function IntervenantNavigation() {
   }, [selectedClassId]);
 
   useEffect(() => {
-    if(!!selectedClassId){
-      return
+    if (!!selectedClassId) {
+      return;
     }
-    if(teacherClasses && teacherClasses.length>0){
-      setSelectedClassId(teacherClasses[0].id)
+    if (teacherClasses && teacherClasses.length > 0) {
+      setSelectedClassId(teacherClasses[0].id);
     }
   }, [teacherClasses]);
 
@@ -156,9 +152,15 @@ export default function IntervenantNavigation() {
     <div className="h-screen p-3 space-y-2 w-72 dark:bg-gray-50 dark:text-gray-800 border-r border-second flex flex-col justify-between">
       <div>
         <div className="flex items-center p-2 space-x-4">
-          <img src="https://source.unsplash.com/100x100/portrait" alt="" className="w-12 h-12 rounded-full dark:bg-gray-500" />
+          <img
+            src="https://source.unsplash.com/100x100/portrait"
+            alt=""
+            className="w-12 h-12 rounded-full dark:bg-gray-500"
+          />
           <div>
-            <h2 className="text-lg font-semibold">{user.firstname} {user.lastname}</h2>
+            <h2 className="text-lg font-semibold">
+              {user.firstname} {user.lastname}
+            </h2>
           </div>
         </div>
         <ul><br />
@@ -175,10 +177,7 @@ export default function IntervenantNavigation() {
                     checked={selectedClassId === classe.id}
                     className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
                     onChange={(e) => {
-                      classe.restHour = calculHourAlreadyPlaced(
-                        classe,
-                        events
-                      );
+                      classe.restHour = calculHourAlreadyPlaced(classe, events);
                       setSelectedClassId(e.target.value);
                     }}
                   />
@@ -209,7 +208,7 @@ export default function IntervenantNavigation() {
           </li>
         </ul>
       </div>
-      
+
       <div>
         <div>
           <ul className="pt-4 pb-2 space-y-1 text-sm">

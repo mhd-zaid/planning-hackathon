@@ -1,6 +1,6 @@
 import db from '../models/index.js';
 import { checkUUID } from '../utils/uuid.js';
-import { Op } from 'sequelize';
+import { Model, Op } from 'sequelize';
 import PlanningService from "../service/planning-service.js";
 
 const getPlanning = async (req, res) => {
@@ -132,4 +132,84 @@ const getDataToGeneratePlanning = async (classId, startDate, endDate) => {
   };
 };
 
-export default {getPlanning};
+const getBacklog = async (req, res) => {
+  try {
+    const classId = req.params.classId;
+
+    if(!checkUUID(classId)){
+      return res.status(400).json("Identifiant de classe invalide");
+    }
+
+    const classExist = await db.Class.findByPk(classId);
+    if(!classExist){
+      return res.status(404).json("Classe introuvable");
+    }
+
+    const periodInstances = await db.Period.findOne({
+      where: {
+        beginDate: {
+          [Op.lte]: new Date()
+        },
+        endDate: {
+          [Op.gte]: new Date()
+        }
+      },
+      attributes: ['id']
+    });
+
+    const subjectClassInstances = await db.SubjectClass.findAll({
+      where: {
+        classId: classExist.id,
+        periodId: periodInstances.id
+      },
+      attributes: ['id'],
+      include: [
+        {
+          model: db.Subject,
+          as: 'subject',
+          attributes: ['name', 'nbHoursQuota']
+        },
+        {
+          model: db.WorkHour,
+          as: 'workHours',
+          attributes: ['beginDate', 'endDate']
+        }
+      ],
+    });
+
+    const backlogs = calculateBacklog(subjectClassInstances);
+
+    return res.status(200).json(backlogs);
+
+  } catch (error) {
+    return res.status(500).send({ message: error.message });
+  }
+}
+
+const calculateBacklog = (subjectClassInstances) => {
+  const backlogs = [];
+
+  for (const subjectClass of subjectClassInstances) {
+    const subjectQuota = subjectClass.subject.nbHoursQuota;
+    const subjectName = subjectClass.subject.name;
+    let subjectHoursScheduled = 0;
+
+    for (const workHour of subjectClass.workHours) {
+      const beginDate = new Date(workHour.beginDate);
+      const endDate = new Date(workHour.endDate);
+      const diff = endDate - beginDate;
+      const hours = diff / 1000 / 60 / 60;
+      subjectHoursScheduled += hours;
+    }
+    backlogs.push({
+      id: subjectClass.id,
+      subjectName: subjectName,
+      subjectQuota: subjectQuota,
+      subjectHoursScheduled: subjectHoursScheduled,
+      subjectRemainingHours: subjectQuota - subjectHoursScheduled
+    });
+  }
+  return backlogs;
+}
+  
+export default {getPlanning, getBacklog, calculateBacklog};

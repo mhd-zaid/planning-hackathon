@@ -15,7 +15,8 @@ export default function SchoolNavigation() {
     showCalendarWorkHour,
     setShowCalendarWorkHour,
   } = useCalendarContext();
-  const { fillieres, fetchSchoolDays } = useDataContext();
+  const { fillieres, teachers, fetchSchoolDays, fetchWorkHours } =
+    useDataContext();
 
   const { role } = useRoleUser();
 
@@ -27,7 +28,11 @@ export default function SchoolNavigation() {
     selectedFilliere,
     setSelectedClassId,
     setSelectedFilliere,
+    selectedTeacherId,
+    setSelectedTeacherId,
   } = useCalendarContext();
+
+  const [classes, setClasses] = useState<Classes[]>();
 
   const classesFromFilliere = (selectedFilliereValue: string) => {
     return fillieres.find((filliere) => filliere.id === selectedFilliereValue)
@@ -165,8 +170,6 @@ export default function SchoolNavigation() {
     }
   };
 
-  const [classes, setClasses] = useState<Classes[]>();
-
   useEffect(() => {
     const classes = classesFromFilliere(selectedFilliere);
     if (classes && classes.length > 0) {
@@ -186,10 +189,20 @@ export default function SchoolNavigation() {
       setEvents([]);
       setSelectedClassId("");
       setSelectedFilliere("");
-    } else {
-      // Affiché les workHour
     }
   }, [showCalendarWorkHour]);
+
+  useEffect(() => {
+    if (selectedTeacherId) return;
+
+    setSelectedTeacherId(teachers[0]?.id || "");
+  }, [teachers]);
+
+  useEffect(() => {
+    if (!selectedTeacherId) return;
+
+    fetchWorkHours(selectedTeacherId);
+  }, [selectedTeacherId]);
 
   if (!role) {
     return <p>Chargement...</p>;
@@ -208,9 +221,8 @@ export default function SchoolNavigation() {
             <h2 className="text-lg font-semibold">{user.firstname} {user.lastname}</h2>
           </div>
         </div>
-        {!showCalendarWorkHour && (
+        {!showCalendarWorkHour ? (
           <ul className="pt-2 pb-4 space-y-1 text-sm">
-            <li className="dark:bg-gray-100 dark:text-gray-900"></li>
             <li>
               <label
                 htmlFor="filliere"
@@ -307,6 +319,43 @@ export default function SchoolNavigation() {
                 </form>
               )}
             </li>
+          </ul>
+        ) : (
+          <ul>
+            {teachers?.map((teacher) => (
+              <li key={teacher.id}>
+                <div className="flex p-2 rounded hover:bg-gray-100">
+                  <div className="flex items-center h-5">
+                    <input
+                      id={`input-index-${teacher.id}`}
+                      type="radio"
+                      name="teacher-radio"
+                      value={teacher.id}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                      checked={selectedTeacherId === teacher.id}
+                      onChange={(e) => {
+                        setSelectedTeacherId(e.target.value);
+                      }}
+                    />
+                  </div>
+                  <div className="ms-2 text-sm">
+                    <label
+                      htmlFor={`input-index-${teacher.id}`}
+                      className="font-medium text-gray-900"
+                    >
+                      <div className="font-bold">
+                        {teacher.firstname} {teacher.lastname}
+                      </div>
+                      {/* {teacher.restHour && (
+                        <p className="text-xs font-normal text-gray-500">
+                          Il reste {classe.restHour} heures à placé
+                        </p>
+                      )} */}
+                    </label>
+                  </div>
+                </div>
+              </li>
+            ))}
           </ul>
         )}
       </div>

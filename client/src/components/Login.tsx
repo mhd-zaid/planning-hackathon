@@ -1,16 +1,11 @@
-import React, { ChangeEvent, FormEvent, useState } from "react";
+import React, { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import getUsers from "@/utils/api/getUsers";
-import { User } from "@/utils/types/user.interface";
-import { useDataContext } from "@/utils/context/data";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const router = useRouter();
-
-  // const { users } = useDataContext();
-  const { users } = useDataContext();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,7 +38,10 @@ const Login = () => {
     <div className="flex items-center justify-center h-screen bg-gray-100">
       <div className="bg-white rounded-lg w-full max-w-lg p-8 shadow-lg">
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          <p className="text-4xl">Edu<span className="text-first">P</span>lan<span className="text-first text-4xl">.</span></p>
+          <p className="text-4xl">
+            Edu<span className="text-first">P</span>lan
+            <span className="text-first text-4xl">.</span>
+          </p>
         </h1>
         <h3 className="text-lg text-center text-gray-600 mb-4">
           Connectez-vous !

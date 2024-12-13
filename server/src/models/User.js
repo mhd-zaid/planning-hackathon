@@ -16,6 +16,10 @@ export default function (connection) {
         foreignKey: 'teacherId',
         as: 'subjectClasses',
       });
+      db.User.hasMany(db.Unavailability, {
+        foreignKey: 'userId',
+        as: 'unavailabilities',
+        });
     }
   }
 

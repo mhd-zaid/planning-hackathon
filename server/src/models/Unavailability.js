@@ -1,28 +1,25 @@
 import { Model, DataTypes } from "sequelize";
 
 export default function (connection) {
-  class SchoolDayClass extends Model {
+  class Unavailability extends Model {
     static associate(db) {
-      db.SchoolDayClass.belongsTo(db.Class, {
-        foreignKey: "classId",
-        as: "class",
+      db.Unavailability.belongsTo(db.User, {
+        foreignKey: "userId",
+        as: "teacher",
       });
-
-      db.SchoolDayClass.hasMany(db.WorkHour, {
-        foreignKey: "schoolDayClassId",
-        as: "workHours",
-        onDelete: "CASCADE",
+      db.Unavailability.belongsTo(db.SubjectClass, {
+        foreignKey: "subjectClassId",
+        as: "subjectClass",
       });
     }
   }
 
-  SchoolDayClass.init(
+  Unavailability.init(
     {
       id: { type: DataTypes.UUID, primaryKey: true },
       date: {
-        type: DataTypes.DATEONLY,
+        type: DataTypes.DATE,
         allowNull: false,
-        unique: false,
         validate: {
           notEmpty: {
             msg: "La date ne peut pas être vide.",
@@ -32,9 +29,9 @@ export default function (connection) {
     },
     {
       sequelize: connection,
-      tableName: "SchoolDayClass",
+      tableName: "Unavailability",
     }
   );
 
-  return SchoolDayClass;
+  return Unavailability;
 }

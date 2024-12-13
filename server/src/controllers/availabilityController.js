@@ -63,24 +63,6 @@ const create = async (req, res) => {
         }
       }
 
-      // await availabilities.forEach(async (availability) => {
-      //       const overlap = await db.Availability.findOne({
-      //           where: {
-      //               userId: req.params.userId,
-      //               [Op.and]: [
-      //                   {beginDate: {[Op.lt]: availability.endDate}},
-      //                   {endDate: {[Op.gt]: availability.beginDate}},
-      //               ],
-      //           },
-      //       });
-      //
-      //       if (overlap) {
-      //           availabilitiesError.push(availability);
-      //       }else {
-      //           availabilitiesSuccess.push(availability);
-      //       }
-      //   });
-
         await Promise.all(
             availabilitiesSuccess.map((availability) => {
                 return db.Availability.create({
