@@ -330,16 +330,14 @@ export default function SchoolNavigation() {
             </li>
           </ul>
         )}
-
-      <div className="p-4">
-      <button
-        className="bg-blue-500 text-white px-4 py-2 rounded-md"
-        onClick={() => setIsModalOpen(true)}
-      >
-        Ouvrir la modal
-      </button>
-      <ModalGeneratePlanning isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-      </div>
+    <a
+      rel="noopener noreferrer"
+      onClick={() => setIsModalOpen(true)}
+      className="flex items-center p-2 space-x-3 rounded-md bg-second hover:bg-second cursor-pointer"
+    >
+    <span className="text-lg text-white">Générer un planning</span>
+    </a>
+      <ModalGeneratePlanning isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} classId={selectedBacklog}/>
 
         {displayedByRole === RoleUser.professor && (
           <>

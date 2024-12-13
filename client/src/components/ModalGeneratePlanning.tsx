@@ -4,10 +4,11 @@ import { ClipLoader } from "react-spinners"; // Importation du spinner
 
 interface ModalGeneratePlanningProps {
   isOpen: boolean;
+  classId: string;
   onClose: () => void;
 }
 
-const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, onClose }) => {
+const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, onClose, classId }) => {
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [potentialWorkHours, setPotentialWorkHours] = useState<any[]>([]); // Tableau pour stocker les horaires potentiels récupérés
@@ -18,10 +19,10 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
 
   // Fonction pour récupérer les potential work hours après avoir confirmé les dates
   const fetchPotentialWorkHours = async () => {
-    setIsLoading(true);
+    // setIsLoading(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_API}/plannings/74061629-546b-4583-8e74-bcac03989088?start=2024-12-01&end=2024-12-31`,
+        `${process.env.NEXT_PUBLIC_URL_API}/plannings/${classId}?start=${startDate}&end=${endDate}`,
         {
           method: "GET",
           headers: {
@@ -103,11 +104,7 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
         {/* Première partie de la modal (sélecteurs de dates et bouton de confirmation) */}
         {potentialWorkHours.length === 0 && (
           <>
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Sélectionnez une plage de dates</h2>
-            dd
-            <ClipLoader size={20} color="#fff" />
-
-
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Génération de planning</h2>
             <div className="mb-4">
               <label htmlFor="start-date" className="block text-sm font-medium text-gray-700 mb-2">
                 Date de début
