@@ -1,44 +1,109 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 import { useCalendarContext } from "@/utils/context/calendar";
-import { ChangeEvent } from "react";
+import { useDataContext } from "@/utils/context/data";
 import LogoutButton from "./Logout";
 import useRoleUser from "@/utils/hook/useRoleUser";
-
-enum ValueSemester {
-  SEMESTER_ONE = "1",
-  SEMESTER_TWO = "2",
-}
+import { User } from "@/utils/types/user.interface";
+import { Classes } from "@/utils/types/classes.interface";
+import { Event } from "@/utils/types/event.interface";
 
 export default function IntervenantNavigation() {
-  const { setSemesterRange } = useCalendarContext();
+  const { classes, fetchSchoolDays } = useDataContext();
+  // const [user, setUser] = useState();
+  const { selectedClassId, setSelectedClassId, events } = useCalendarContext();
 
   const { role } = useRoleUser();
 
-  const semesterOne = {
-    start: "2024-01-01",
-    end: "2024-06-30",
-  };
+  const getDatesBetween = (startDate: string, endDate: string) => {
+    const dates = [];
+    const currentDate = new Date(startDate);
+    const end = new Date(endDate);
 
-  const semesterTwo = {
-    start: "2024-07-01",
-    end: "2024-12-31",
-  };
-
-  const onChangeSemester = (e: ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value as ValueSemester;
-    switch (value) {
-      case ValueSemester.SEMESTER_ONE:
-        setSemesterRange(semesterOne);
-        break;
-      case ValueSemester.SEMESTER_TWO:
-        setSemesterRange(semesterTwo);
-        break;
-      default:
-        break;
+    while (currentDate < end) {
+      dates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
     }
+
+    return dates;
   };
+
+  const formatEventsToDayDate = (events: Event[], formNew?: boolean) => {
+    const dates: { date: string }[] = events.flatMap((event) => {
+      if (formNew && !event.id.startsWith("NEW-")) {
+        return [];
+      }
+
+      if (!event.end) {
+        return [
+          {
+            date: event.start,
+          },
+        ];
+      } else {
+        const dates = getDatesBetween(event.start, event.end);
+        return dates.map((date) => ({
+          date: date.toISOString().split("T")[0],
+        }));
+      }
+    });
+
+    return dates;
+  };
+
+  const calculRestHour = (classe: Classes | undefined) => {
+    if (!classe) return 0;
+
+    const restHourByClasse = classe.subjectClasses.reduce((acc, current) => {
+      return (
+        acc + current.subject.nbHoursQuota + current.subject.nbHoursQuotaExam
+      );
+    }, 0);
+
+    return restHourByClasse;
+  };
+
+  const calculHourAlreadyPlaced = (classe: Classes, events: Event[]) => {
+    if (!events || !events.length) return 0;
+
+    const baseHour = calculRestHour(classe);
+
+    const HOUR_BY_DAY = 8;
+    const dayAlreadyPlaced = formatEventsToDayDate(events).length;
+
+    return baseHour - dayAlreadyPlaced * HOUR_BY_DAY;
+  };
+
+  const userstr = localStorage.getItem("loggedInUser");
+  const user: User = userstr && JSON.parse(userstr);
+
+  const teacherClasses = classes
+    .flatMap((classe) =>
+      classe.subjectClasses.map((subjectClasse) => {
+        if (subjectClasse.teacher.id === user.id) {
+          return classe;
+        } else {
+          return null;
+        }
+      })
+    )
+    .filter((teacher) => teacher) as Classes[];
+
+  useEffect(() => {
+    if (!!selectedClassId) {
+      fetchSchoolDays(selectedClassId);
+    }
+  }, [selectedClassId]);
+
+  useEffect(() => {
+    if (!!selectedClassId) {
+      return;
+    }
+    if (teacherClasses && teacherClasses.length > 0) {
+      setSelectedClassId(teacherClasses[0].id);
+    }
+  }, [teacherClasses]);
 
   if (!role) {
     return <p>Chargement...</p>;
@@ -49,55 +114,52 @@ export default function IntervenantNavigation() {
       <div>
         <div className="flex items-center p-2 space-x-4">
           <img
-            src="https://source.unsplash.com/100x100/?portrait"
+            src="https://source.unsplash.com/100x100/portrait"
             alt=""
             className="w-12 h-12 rounded-full dark:bg-gray-500"
           />
           <div>
-            <h2 className="text-lg font-semibold">Nom Prénom</h2>
+            <h2 className="text-lg font-semibold">
+              {user.firstname} {user.lastname}
+            </h2>
           </div>
         </div>
-        <ul className="pt-2 pb-4 space-y-1 text-sm">
-          <li className="dark:bg-gray-100 dark:text-gray-900">
-            <select
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-              defaultValue={""}
-            >
-              <option value="" disabled>
-                Fillière
-              </option>
-              <option value="iw">Ingénierie web</option>
-              <option value="hack">Sécurité</option>
-              <option value="market">Marketing</option>
-            </select>
-          </li>
-          <li>
-            <select
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-              defaultValue={""}
-            >
-              <option value="" disabled>
-                Classe
-              </option>
-              <option value="iw">Classe 4A</option>
-              <option value="hack">Classe 4B</option>
-              <option value="market">Classe 5A</option>
-              <option value="market">Classe 5B</option>
-            </select>
-          </li>
-          <li>
-            <select
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-              defaultValue={""}
-              onChange={(e) => onChangeSemester(e)}
-            >
-              <option value="" disabled>
-                Période
-              </option>
-              <option value="1">Semestre 1</option>
-              <option value="2">Semestre 2</option>
-            </select>
-          </li>
+        <ul>
+          <br />
+          <p>Mes classes : </p>
+          {teacherClasses?.map((classe: Classes) => (
+            <li key={classe.id}>
+              <div className="flex p-2 rounded hover:bg-gray-100">
+                <div className="flex items-center h-5">
+                  <input
+                    id={`input-index-${classe.name}`}
+                    type="radio"
+                    name="classe-radio"
+                    value={classe.id}
+                    checked={selectedClassId === classe.id}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                    onChange={(e) => {
+                      classe.restHour = calculHourAlreadyPlaced(classe, events);
+                      setSelectedClassId(e.target.value);
+                    }}
+                  />
+                </div>
+                <div className="ms-2 text-sm">
+                  <label
+                    htmlFor={`input-index-${classe.name}`}
+                    className="font-medium text-gray-900"
+                  >
+                    <div className="font-bold">{classe.name}</div>
+                    {classe.restHour && (
+                      <p className="text-xs font-normal text-gray-500">
+                        Il reste {classe.restHour} heures à placé
+                      </p>
+                    )}
+                  </label>
+                </div>
+              </div>
+            </li>
+          ))}
         </ul>
       </div>
 
