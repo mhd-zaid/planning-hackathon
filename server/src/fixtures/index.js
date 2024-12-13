@@ -110,15 +110,15 @@ const loadClasses = async () => {
   try {
     const branches = await db.Branch.findAll();
     await Promise.all(
-      classesFixture.map(classData => {
+      classesFixture.map(async classData => {
         const branch = branches.find(branch => branch.name === classData.branch);
-        model.create({
+        await model.create({
           id: classData.id,
           name: classData.name,
           branchId: branch.id,
         });
         if (classData.student == true) {
-          db.User.create({
+          await db.User.create({
               id: uuidv4(),
               lastname: 'Mouhamad',
               firstname: 'Zaid',
