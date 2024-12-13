@@ -15,6 +15,8 @@ const Login = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const users = await getUsers();
+
     const user = users.find((u) => u.email === email);
 
     if (user) {

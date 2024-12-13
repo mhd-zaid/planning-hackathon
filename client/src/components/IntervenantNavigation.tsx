@@ -7,6 +7,8 @@ import { useDataContext } from "@/utils/context/data";
 import { ChangeEvent } from "react";
 import LogoutButton from "./Logout";
 import useRoleUser from "@/utils/hook/useRoleUser";
+import { User } from "@/utils/types/user.interface";
+import { Classes } from "@/utils/types/classes.interface";
 
 enum ValueSemester {
   SEMESTER_ONE = "1",
@@ -14,8 +16,10 @@ enum ValueSemester {
 }
 
 export default function IntervenantNavigation() {
-  const [user, setUser] = useState();
-  const { setSemesterRange } = useCalendarContext();
+
+  const {classes, fetchSchoolDays} = useDataContext();
+  // const [user, setUser] = useState();
+  const { setSemesterRange, selectedClassId, setSelectedClassId } = useCalendarContext();
 
   const { role } = useRoleUser()
 
@@ -43,6 +47,32 @@ export default function IntervenantNavigation() {
     }
   };
 
+  const userstr = localStorage.getItem("loggedInUser");
+  const user : User = userstr && JSON.parse(userstr);
+
+  const teacherClasses = classes.flatMap((classe) => classe.subjectClasses.map((subjectClasse) => {
+    if(subjectClasse.teacher.id === user.id){
+      return classe
+    } else {
+      return null
+    }
+  })).filter((teacher) => teacher) as Classes[]
+
+  useEffect(() => {
+    if (!!selectedClassId) {
+      fetchSchoolDays(selectedClassId);
+    }
+  }, [selectedClassId]);
+
+  useEffect(() => {
+    if(!!selectedClassId){
+      return
+    }
+    if(teacherClasses && teacherClasses.length>0){
+      setSelectedClassId(teacherClasses[0].id)
+    }
+  }, [teacherClasses]);
+
   if (!role) {
     return <p>Chargement...</p>;
   }
@@ -58,49 +88,40 @@ export default function IntervenantNavigation() {
             <h2 className="text-lg font-semibold"></h2>
           </div>
         </div>
-          <ul className="pt-2 pb-4 space-y-1 text-sm">
-            <li>Matière : </li>
-            <li className="dark:bg-gray-100 dark:text-gray-900">
-              <select
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                defaultValue={""}
-              >
-                <option value="" disabled>
-                  Fillière
-                </option>
-                <option value="iw">Ingénierie web</option>
-                <option value="hack">Sécurité</option>
-                <option value="market">Marketing</option>
-              </select>
+        <ul>
+          {teacherClasses?.map((classe: Classes) => (
+            <li key={classe.id}>
+              <div className="flex p-2 rounded hover:bg-gray-100">
+                <div className="flex items-center h-5">
+                  <input
+                    id={`input-index-${classe.name}`}
+                    type="radio"
+                    name="classe-radio"
+                    value={classe.id}
+                    checked={selectedClassId === classe.id}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                    onChange={(e) => {
+                      setSelectedClassId(e.target.value);
+                    }}
+                  />
+                </div>
+                <div className="ms-2 text-sm">
+                  <label
+                    htmlFor={`input-index-${classe.name}`}
+                    className="font-medium text-gray-900"
+                  >
+                    <div className="font-bold">{classe.name}</div>
+                    {classe.restHour && (
+                      <p className="text-xs font-normal text-gray-500">
+                        Il reste {classe.restHour} heures à placé
+                      </p>
+                    )}
+                  </label>
+                </div>
+              </div>
             </li>
-            <li>
-            <select
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                  defaultValue={""}
-                >
-                  <option value="" disabled>
-                    Classe
-                  </option>
-                  <option value="iw">Classe 4A</option>
-                  <option value="hack">Classe 4B</option>
-                  <option value="market">Classe 5A</option>
-                  <option value="market">Classe 5B</option>
-                </select>
-            </li>
-            <li>
-            <select
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                  defaultValue={""}
-                  onChange={(e) => onChangeSemester(e)}
-                >
-                  <option value="" disabled>
-                    Période
-                  </option>
-                  <option value="1">Semestre 1</option>
-                  <option value="2">Semestre 2</option>
-                </select>
-            </li>
-          </ul>
+          ))}
+        </ul>
       </div>
       
       <div>
