@@ -112,11 +112,21 @@ const loadClasses = async () => {
     await Promise.all(
       classesFixture.map(classData => {
         const branch = branches.find(branch => branch.name === classData.branch);
-        return model.create({
+        model.create({
           id: classData.id,
           name: classData.name,
           branchId: branch.id,
         });
+        if (classData.student == true) {
+          db.User.create({
+              id: uuidv4(),
+              lastname: 'Mouhamad',
+              firstname: 'Zaid',
+              email: 'zaid@mail.fr',
+              role: 'student',
+              classId: classData.id,
+            });
+          }
       }
       ));
     console.log('Classes loaded');
