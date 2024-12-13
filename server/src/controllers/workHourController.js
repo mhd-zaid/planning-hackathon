@@ -256,4 +256,44 @@ const getWorkHoursByUser = async (req, res) => {
   }
 };
 
-export default { create, deleteWorkHour, getWorkHoursByUser };
+const getWorkHoursByClass = async (req, res) => {
+  try {
+    const classId = req.params.classId;
+
+    if (!checkUUID(classId)) {
+      return res.status(400).json({ message: "Cette classe n'existe pas." });
+    }
+
+    const subjectClasses = await db.SubjectClass.findAll({
+      where: {
+        classId,
+      },
+    });
+
+    const subjectClassIds = subjectClasses.map((subjectClass) => subjectClass.id);
+
+    const workHours = await db.WorkHour.findAll({
+      attributes: ["beginDate", "endDate"],
+      include: [
+        {
+          model: db.SubjectClass,
+          as: "subjectClass",
+          where: {
+            id: {
+              [Op.in]: subjectClassIds,
+            },
+          },
+          attributes: ["id"],
+        },
+      ],
+    });
+
+    return res.status(200).json(workHours);
+  }
+  catch (error) {
+    console.error("Une erreur s'est produite :", error);
+    return res.status(500).error("Une erreur s'est produite");
+  }
+}
+
+export default { create, deleteWorkHour, getWorkHoursByUser, getWorkHoursByClass };
