@@ -330,13 +330,7 @@ export default function SchoolNavigation() {
             </li>
           </ul>
         )}
-    <a
-      rel="noopener noreferrer"
-      onClick={() => setIsModalOpen(true)}
-      className="flex items-center p-2 space-x-3 rounded-md bg-second hover:bg-second cursor-pointer"
-    >
-    <span className="text-lg text-white">Générer un planning</span>
-    </a>
+
       <ModalGeneratePlanning isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} classId={selectedBacklog}/>
 
         {displayedByRole === RoleUser.professor && (
@@ -383,6 +377,13 @@ export default function SchoolNavigation() {
 
             {selectedBacklog && (
               <>
+              <a
+              rel="noopener noreferrer"
+              onClick={() => setIsModalOpen(true)}
+              className="mt-5 flex items-center p-2 space-x-3 rounded-md bg-second hover:bg-second cursor-pointer"
+                >
+                <span className="text-lg text-white">Générer un planning</span>
+                </a>
                 <h3 className="mt-4 font-bold">Récapitulatif des heures</h3>
                 {backlogs.map((backlog, index) => (
                   <div
