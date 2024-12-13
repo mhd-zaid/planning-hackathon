@@ -8,6 +8,7 @@ import useRoleUser from "@/utils/hook/useRoleUser";
 import { RoleUser } from "@/utils/types/role-user.enum";
 import { Backlog } from "@/utils/types/back-log.interface";
 import { Classes } from "@/utils/types/classes.interface";
+import ModalGeneratePlanning from "./ModalGeneratePlanning";
 
 export default function SchoolNavigation() {
   const { setSemesterRange } = useCalendarContext();
@@ -39,6 +40,8 @@ export default function SchoolNavigation() {
   const [backlogs, setBacklogs] = useState<Backlog[]>([]);
   const [selectedBacklog, setSelectedBacklog] = useState("");
   const [filteredClasses, setFilteredClasses] = useState<Classes[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   const periodFromFilliere = (selectedFilliereValue: string) => {
     const periods = fillieres
@@ -197,7 +200,7 @@ export default function SchoolNavigation() {
       <div>
         <div className="flex items-center p-2 space-x-4">
           <img
-            src="https://source.unsplash.com/100x100/portrait"
+            src="https://images.unsplash.com/photo-1733077151624-eabccd7ba381?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt=""
             className="w-12 h-12 rounded-full dark:bg-gray-500"
           />
@@ -327,6 +330,16 @@ export default function SchoolNavigation() {
             </li>
           </ul>
         )}
+
+      <div className="p-4">
+      <button
+        className="bg-blue-500 text-white px-4 py-2 rounded-md"
+        onClick={() => setIsModalOpen(true)}
+      >
+        Ouvrir la modal
+      </button>
+      <ModalGeneratePlanning isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      </div>
 
         {displayedByRole === RoleUser.professor && (
           <>

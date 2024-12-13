@@ -154,7 +154,7 @@ export default function IntervenantNavigation() {
       <div>
         <div className="flex items-center p-2 space-x-4">
           <img
-            src="https://source.unsplash.com/100x100/portrait"
+            src="https://images.unsplash.com/photo-1629054881775-ced62585d800?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt=""
             className="w-12 h-12 rounded-full dark:bg-gray-500"
           />

@@ -1,3 +1,5 @@
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import type { Metadata } from "next";
 import "./globals.css";
 
@@ -13,7 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr">
-      <body className="bg-white">{children}</body>
+      <body className="bg-white">
+        {children}
+        <ToastContainer position="top-right" autoClose={3000} />
+      </body>
     </html>
   );
 }
