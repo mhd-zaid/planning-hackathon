@@ -1,3 +1,4 @@
+import { Classes } from "./classes.interface";
 import { RoleUser } from "./role-user.enum";
 
 export interface User {
@@ -6,6 +7,8 @@ export interface User {
   lastname: string;
   email: string;
   role: RoleUser;
+  class: Classes;
+  classId: string;
   createdAt: string;
   updatedAt: string;
 }

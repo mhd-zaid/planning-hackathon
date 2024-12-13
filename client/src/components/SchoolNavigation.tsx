@@ -4,25 +4,21 @@ import { useCalendarContext } from "@/utils/context/calendar";
 import { useDataContext } from "@/utils/context/data";
 import { Period } from "@/utils/types/period.interface";
 import { Event } from "@/utils/types/event.interface";
-import { Classes } from "@/utils/types/classes.interface";
-import { User } from "@/utils/types/user.interface";
 import useRoleUser from "@/utils/hook/useRoleUser";
 import { RoleUser } from "@/utils/types/role-user.enum";
 import { Backlog } from "@/utils/types/back-log.interface";
+import { Classes } from "@/utils/types/classes.interface";
 
 export default function SchoolNavigation() {
   const { setSemesterRange } = useCalendarContext();
-  const { fillieres, teachers, fetchSchoolDays, fetchWorkHours } =
-    useDataContext();
-
-  const { role } = useRoleUser();
-
-  const [classes, setClasses] = useState<Classes[]>();
-  const [backlogs, setBacklogs] = useState<Backlog[]>([]);
-  const [selectedBacklog, setSelectedBacklog] = useState("");
-
-  const userstr = localStorage.getItem("loggedInUser");
-  const user: User = userstr && JSON.parse(userstr);
+  const {
+    fillieres,
+    classes,
+    teachers,
+    fetchSchoolDays,
+    fetchWorkHours,
+    fetchStudentWorkHours,
+  } = useDataContext();
 
   const {
     setShowAdmin,
@@ -38,10 +34,11 @@ export default function SchoolNavigation() {
     setDisplayedByRole,
   } = useCalendarContext();
 
-  const classesFromFilliere = (selectedFilliereValue: string) => {
-    return fillieres.find((filliere) => filliere.id === selectedFilliereValue)
-      ?.classes;
-  };
+  const { role, user } = useRoleUser();
+
+  const [backlogs, setBacklogs] = useState<Backlog[]>([]);
+  const [selectedBacklog, setSelectedBacklog] = useState("");
+  const [filteredClasses, setFilteredClasses] = useState<Classes[]>([]);
 
   const periodFromFilliere = (selectedFilliereValue: string) => {
     const periods = fillieres
@@ -59,29 +56,6 @@ export default function SchoolNavigation() {
       }
       return acc;
     }, [] as Period[]);
-  };
-
-  const calculRestHour = (classe: Classes | undefined) => {
-    if (!classe) return 0;
-
-    const restHourByClasse = classe.subjectClasses.reduce((acc, current) => {
-      return (
-        acc + current.subject.nbHoursQuota + current.subject.nbHoursQuotaExam
-      );
-    }, 0);
-
-    return restHourByClasse;
-  };
-
-  const calculHourAlreadyPlaced = (classe: Classes, events: Event[]) => {
-    if (!events || !events.length) return 0;
-
-    const baseHour = calculRestHour(classe);
-
-    const HOUR_BY_DAY = 8;
-    const dayAlreadyPlaced = formatEventsToDayDate(events).length;
-
-    return baseHour - dayAlreadyPlaced * HOUR_BY_DAY;
   };
 
   const onChangeSemester = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -171,16 +145,25 @@ export default function SchoolNavigation() {
     }
   };
 
-  const getAllClasses = () => {
-    return fillieres.flatMap((filliere) => filliere.classes);
-  };
-
   const getBacklog = (classId: string) => {
     const backlog = fetch(
       process.env.NEXT_PUBLIC_URL_API + `/plannings/backlog/${classId}`
     );
     return backlog.then((response) => response.json());
   };
+
+  const classesFromFilliere = (selectedFilliereValue: string) => {
+    return fillieres.find((filliere) => filliere.id === selectedFilliereValue)
+      ?.classes;
+  };
+
+  useEffect(() => {
+    const classes = classesFromFilliere(selectedFilliere);
+    if (classes && classes.length > 0) {
+      setSelectedClassId(classes[0].id);
+      setFilteredClasses(classes);
+    }
+  }, [selectedFilliere]);
 
   useEffect(() => {
     if (!selectedBacklog) {
@@ -193,18 +176,10 @@ export default function SchoolNavigation() {
   }, [selectedBacklog]);
 
   useEffect(() => {
-    const classes = classesFromFilliere(selectedFilliere);
     if (classes && classes.length > 0) {
       setSelectedClassId(classes[0].id);
-      setClasses(classes);
     }
   }, [selectedFilliere]);
-
-  useEffect(() => {
-    if (!!selectedClassId) {
-      fetchSchoolDays(selectedClassId);
-    }
-  }, [selectedClassId]);
 
   useEffect(() => {
     if (selectedTeacherId) return;
@@ -212,12 +187,6 @@ export default function SchoolNavigation() {
     setSelectedTeacherId(teachers[0]?.id || "");
     fetchWorkHours(teachers[0]?.id || "");
   }, [teachers]);
-
-  useEffect(() => {
-    if (!selectedTeacherId) return;
-
-    fetchWorkHours(selectedTeacherId);
-  }, [selectedTeacherId]);
 
   if (!role) {
     return <p>Chargement...</p>;
@@ -291,7 +260,7 @@ export default function SchoolNavigation() {
                     Choisir une classe
                   </p>
                   <ul>
-                    {classes?.map((classe) => (
+                    {filteredClasses?.map((classe) => (
                       <li key={classe.id}>
                         <div className="flex p-2 rounded hover:bg-gray-100">
                           <div className="flex items-center h-5">
@@ -303,10 +272,7 @@ export default function SchoolNavigation() {
                               checked={selectedClassId === classe.id}
                               className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
                               onChange={(e) => {
-                                classe.restHour = calculHourAlreadyPlaced(
-                                  classe,
-                                  events
-                                );
+                                fetchSchoolDays(selectedClassId);
                                 setSelectedClassId(e.target.value);
                               }}
                             />
@@ -370,7 +336,7 @@ export default function SchoolNavigation() {
             <select
               id="period"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-              onChange={(e) => setSelectedTeacherId(e.target.value)}
+              onChange={(e) => fetchWorkHours(e.target.value)}
             >
               {teachers?.map((teacher) => (
                 <option key={teacher.id} value={teacher.id}>
@@ -384,26 +350,29 @@ export default function SchoolNavigation() {
         {displayedByRole === RoleUser.student && (
           <div>
             <div>
-              <h3 className="text-md font-semibold mt-4 mb-3">
-                Récapitulatif des heures
-              </h3>
+              <label className="block mt-6 mb-2 text-lg font-medium text-gray-900 text-center">
+                Choisir une classe
+              </label>
               <select
                 id="classe"
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                 onChange={(e) => {
                   setSelectedBacklog(e.target.value);
+                  fetchStudentWorkHours(e.target.value);
                 }}
               >
                 <option value={""}>Choisir une classe</option>
-                {getAllClasses().map((classe) => (
+                {classes.map((classe) => (
                   <option key={classe.id} value={classe.id}>
                     {classe.name}
                   </option>
                 ))}
               </select>
             </div>
-            {backlogs.length > 0 ? (
+
+            {selectedBacklog && (
               <>
+                <h3 className="mt-4 font-bold">Récapitulatif des heures</h3>
                 {backlogs.map((backlog, index) => (
                   <div
                     key={index}
@@ -422,8 +391,6 @@ export default function SchoolNavigation() {
                   </div>
                 ))}
               </>
-            ) : (
-              <p className="mt-4 text-gray-600">Aucune classe sélectionner.</p>
             )}
           </div>
         )}

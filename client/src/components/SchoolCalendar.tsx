@@ -14,58 +14,40 @@ import { RoleUser } from "@/utils/types/role-user.enum";
 
 export default function SchoolCalendar() {
   const {
-    semesterRange,
     events,
-    setEvents,
-    selectedClassId,
-    showCalendarWorkHour,
     workHourEvent,
-    setWorkhourEvent,
+    studentEvents,
+    semesterRange,
+    selectedClassId,
     displayedByRole,
+    setEvents,
+    setWorkhourEvent,
+    setStudentEvents,
   } = useCalendarContext();
 
-  const { fillieres, schoolDays, workHours } = useDataContext();
+  const { fillieres, schoolDays, workHours, studentWorkHours } =
+    useDataContext();
+
+  const gridDisplayed = {
+    [RoleUser.manager]: "dayGridMonth",
+    [RoleUser.professor]: "timeGridWeek",
+    [RoleUser.student]: "timeGridWeek dayGridMonth",
+  };
 
   const headerToolbarProps = {
     left: "prev,next today",
     center: "title",
-    right: `${showCalendarWorkHour ? "timeGridWeek" : "dayGridMonth"}`,
+    right: gridDisplayed[displayedByRole],
   };
 
   const [idToDelete, setIdToDelete] = useState<string>("");
+  const [eventWorkHour, setEventWorkHour] = useState<DateClickArg>();
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [showModalDelete, setShowModalDelete] = useState<boolean>(false);
 
   const selectedClasse = fillieres
     .flatMap((filliere) => filliere.classes)
     .find((classe) => classe.id === selectedClassId);
-
-  const fillEvents = () => {
-    setEvents([]);
-    schoolDays.forEach((schoolDay) => {
-      const event = {
-        id: schoolDay.id,
-        title: schoolDay.class.name,
-        start: schoolDay.date,
-        end: undefined,
-      };
-
-      setEvents((prev) => [...prev, event]);
-    });
-  };
-
-  const fillWorkHoursEvents = () => {
-    setWorkhourEvent([]);
-
-    workHours.forEach((workHour) => {
-      const event = {
-        id: workHour.id,
-        title: "Professeur",
-        start: workHour.beginDate,
-        end: workHour.endDate,
-      };
-
-      setWorkhourEvent((prev) => [...prev, event]);
-    });
-  };
 
   const eventsOverlap = (
     dateStartNewEvent: string,
@@ -216,16 +198,55 @@ export default function SchoolCalendar() {
     processSelectDateOnMultipleDays(event);
   };
 
-  const [eventWorkHour, setEventWorkHour] = useState<DateClickArg>();
-
   const dateClickWorkHour = (eventWorkHour: DateClickArg) => {
     setEventWorkHour(eventWorkHour);
 
     setShowModal(true);
   };
 
-  const [showModal, setShowModal] = useState<boolean>(false);
-  const [showModalDelete, setShowModalDelete] = useState<boolean>(false);
+  const fillEvents = () => {
+    setEvents([]);
+    schoolDays.forEach((schoolDay) => {
+      const event = {
+        id: schoolDay.id,
+        title: schoolDay.class.name,
+        start: schoolDay.date,
+        end: undefined,
+      };
+
+      setEvents((prev) => [...prev, event]);
+    });
+  };
+
+  const fillWorkHoursEvents = () => {
+    setWorkhourEvent([]);
+
+    workHours.forEach((workHour) => {
+      const event = {
+        id: workHour.id,
+        title: "Professeur",
+        start: workHour.beginDate,
+        end: workHour.endDate,
+      };
+
+      setWorkhourEvent((prev) => [...prev, event]);
+    });
+  };
+
+  const fillStudentHours = () => {
+    setStudentEvents([]);
+
+    studentWorkHours.forEach((studentWorkHour) => {
+      const event = {
+        id: studentWorkHour.id,
+        title: "Cours de ??",
+        start: studentWorkHour.beginDate,
+        end: studentWorkHour.endDate,
+      };
+
+      setStudentEvents((prev) => [...prev, event]);
+    });
+  };
 
   useEffect(() => {
     fillEvents();
@@ -234,6 +255,10 @@ export default function SchoolCalendar() {
   useEffect(() => {
     fillWorkHoursEvents();
   }, [workHours]);
+
+  useEffect(() => {
+    fillStudentHours();
+  }, [studentWorkHours]);
 
   return (
     <>
@@ -300,7 +325,7 @@ export default function SchoolCalendar() {
           locale={frLocale}
           nowIndicator={true}
           height={"90%"}
-          events={events}
+          events={studentEvents}
           initialView="dayGridMonth"
         />
       )}

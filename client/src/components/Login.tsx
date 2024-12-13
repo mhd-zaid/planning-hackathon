@@ -4,7 +4,6 @@ import getUsers from "@/utils/api/getUsers";
 
 const Login = () => {
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -16,21 +15,10 @@ const Login = () => {
 
     if (user) {
       localStorage.setItem("loggedInUser", JSON.stringify(user));
-      switch (user.role) {
-        case "student":
-          router.push("/");
-          break;
-        case "professor":
-          router.push("/");
-          break;
-        case "manager":
-          router.push("/");
-          break;
-        default:
-          setMessage("Rôle inconnu. Veuillez contacter un administrateur.");
-      }
+      router.push("/");
     } else {
-      setMessage("Adresse email introuvable.");
+      router.push("/login");
+      alert("Adresse email introuvable.");
     }
   };
 

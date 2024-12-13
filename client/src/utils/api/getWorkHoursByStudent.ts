@@ -1,9 +1,9 @@
 import { Workhour } from "../types/work-hour.interface";
 
-export const getWorkHoursByTeacher = async (idUser: string) => {
+export const getWorkHoursByStudent = async (idClass: string) => {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_URL_API}/work-hours/${idUser}`
+      `${process.env.NEXT_PUBLIC_URL_API}/work-hours/get-by-class/${idClass}`
     );
     const data: Workhour[] = await response.json();
     return data || [];

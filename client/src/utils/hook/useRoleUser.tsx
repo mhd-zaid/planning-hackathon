@@ -7,10 +7,14 @@ import IntervenantNavigation from "@/components/IntervenantNavigation";
 import SchoolNavigation from "@/components/SchoolNavigation";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { User } from "../types/user.interface";
 
 export default function useRoleUser() {
   const [role, setRole] = useState<RoleUser | null>(null);
   const router = useRouter();
+
+  const userstr = localStorage.getItem("loggedInUser");
+  const user: User = userstr && JSON.parse(userstr);
 
   useEffect(() => {
     const loggedInUser = localStorage.getItem("loggedInUser");
@@ -41,5 +45,6 @@ export default function useRoleUser() {
     renderCalendar,
     renderNavigation,
     role,
+    user,
   };
 }

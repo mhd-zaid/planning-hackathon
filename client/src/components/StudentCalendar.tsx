@@ -6,6 +6,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { useDataContext } from "@/utils/context/data";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { useEffect } from "react";
+import useRoleUser from "@/utils/hook/useRoleUser";
 
 export default function StudentCalendar() {
   const headerToolbarProps = {
@@ -14,46 +15,45 @@ export default function StudentCalendar() {
     right: "timeGridWeek dayGridMonth",
   };
 
-  const { schoolDays, fetchSchoolDays } = useDataContext();
+  const { fetchStudentWorkHours, studentWorkHours } = useDataContext();
 
-  const { semesterRange, setEvents, events, selectedClassId } =
-    useCalendarContext();
+  const { setStudentEvents, studentEvents } = useCalendarContext();
 
-  const fillEvents = () => {
-    setEvents([]);
-    schoolDays.forEach((schoolDay) => {
+  const { user } = useRoleUser();
+
+  const fillStudentHours = () => {
+    setStudentEvents([]);
+
+    studentWorkHours.forEach((studentWorkHour) => {
       const event = {
-        id: schoolDay.id,
-        title: schoolDay.class.name,
-        start: schoolDay.date,
-        end: undefined,
-        display: "background",
-        color: "#b2b2b2",
+        id: studentWorkHour.id,
+        title: "Cours de ??",
+        start: studentWorkHour.beginDate,
+        end: studentWorkHour.endDate,
       };
-      setEvents((prev) => [...prev, event]);
+
+      setStudentEvents((prev) => [...prev, event]);
     });
   };
 
   useEffect(() => {
-    fillEvents();
-  }, [schoolDays]);
+    fillStudentHours();
+  }, [studentWorkHours]);
 
   useEffect(() => {
-    fetchSchoolDays(selectedClassId);
+    fetchStudentWorkHours(user.classId);
   }, []);
 
   return (
     <FullCalendar
+      key="dayGrid"
       plugins={[dayGridPlugin, timeGridWeek, interactionPlugin]}
       headerToolbar={headerToolbarProps}
       locale={frLocale}
       nowIndicator={true}
-      height={"89%"}
-      selectable={true}
-      dragScroll={true}
-      events={events}
-      editable={true}
-      validRange={semesterRange || undefined}
+      height={"90%"}
+      events={studentEvents}
+      initialView="dayGridMonth"
     />
   );
 }

@@ -22,6 +22,8 @@ interface CalendarContextType {
   setSelectedTeacherId: React.Dispatch<React.SetStateAction<string>>;
   displayedByRole: RoleUser;
   setDisplayedByRole: React.Dispatch<React.SetStateAction<RoleUser>>;
+  studentEvents: Event[];
+  setStudentEvents: React.Dispatch<React.SetStateAction<Event[]>>;
 }
 
 const CalendarContext = createContext<CalendarContextType>({
@@ -43,6 +45,8 @@ const CalendarContext = createContext<CalendarContextType>({
   setSelectedTeacherId: () => {},
   displayedByRole: RoleUser.manager,
   setDisplayedByRole: () => {},
+  studentEvents: [],
+  setStudentEvents: () => {},
 });
 
 export const CalendarProvider = ({
@@ -58,13 +62,14 @@ export const CalendarProvider = ({
   );
 
   const [events, setEvents] = useState<Event[]>([]);
+  const [workHourEvent, setWorkhourEvent] = useState<Event[]>([]);
+  const [studentEvents, setStudentEvents] = useState<Event[]>([]);
 
   const [showAdmin, setShowAdmin] = useState(false);
 
   const [selectedFilliere, setSelectedFilliere] = useState<string>("");
   const [selectedClassId, setSelectedClassId] = useState<string>("");
   const [showCalendarWorkHour, setShowCalendarWorkHour] = useState(false);
-  const [workHourEvent, setWorkhourEvent] = useState<Event[]>([]);
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
 
   const value = {
@@ -86,6 +91,8 @@ export const CalendarProvider = ({
     setSelectedTeacherId,
     displayedByRole,
     setDisplayedByRole,
+    studentEvents,
+    setStudentEvents,
   };
 
   return (
