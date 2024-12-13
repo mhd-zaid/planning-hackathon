@@ -70,12 +70,31 @@ const create = async (req, res) => {
         continue;
       }
 
+      const rooms = await db.Room.findAll();
+      const workHours = await db.WorkHour.findAll({
+        where: {
+          [Op.and]: [
+            { beginDate: { [Op.lte]: workHour.endDate } },
+            { endDate: { [Op.gte]: workHour.beginDate } },
+          ],
+        },
+      });
+
+      const availableRooms = rooms.filter((room) => {
+        const isAvailable = workHours.every((workHour) => {
+          return workHour.roomId !== room.id;
+        });
+
+        return isAvailable;
+      });
+
       const newWorkHour = await db.WorkHour.create({
         id: uuidv4(),
         beginDate: workHour.beginDate,
         endDate: workHour.endDate,
         subjectClassId,
         schoolDayClassId: schoolDayClass.id,
+        roomId: availableRooms[0].id,
       });
 
       workHourSuccess.push(newWorkHour);
