@@ -51,7 +51,7 @@ export default function StudentCalendar() {
       headerToolbar={headerToolbarProps}
       locale={frLocale}
       nowIndicator={true}
-      height={"100%"}
+      height={"89%"}
       selectable={true}
       dragScroll={true}
       events={events}

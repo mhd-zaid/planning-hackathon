@@ -13,6 +13,8 @@ import { Subject } from "../types/subject.interface";
 import { RoleUser } from "../types/role-user.enum";
 import { getWorkHoursByTeacher } from "../api/getWorkHoursByTeacher";
 import { Workhour } from "../types/work-hour.interface";
+import { getAvailabilities } from "../api/getAvailabilities";
+import { avaibilities } from "../types/avaibilities.interface";
 
 interface DataContextType {
   fillieres: Filliere[];
@@ -28,6 +30,8 @@ interface DataContextType {
   fetchSchoolDays: (idClass: string) => void;
   fetchUsers: () => void;
   fetchWorkHours: (idTeacher: string) => void;
+  availabilities: avaibilities[],
+  fetchAvailabilities: (idTeacher: string) => void;
 }
 
 const DataContext = createContext<DataContextType>({
@@ -40,10 +44,12 @@ const DataContext = createContext<DataContextType>({
   subjects: [],
   teachers: [],
   workHours: [],
+  availabilities:[],
   fetchBranches: () => {},
   fetchSchoolDays: () => {},
   fetchUsers: () => {},
   fetchWorkHours: () => {},
+  fetchAvailabilities: () => {},
 });
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
@@ -56,6 +62,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const [subjects, setSubject] = useState<Subject[]>([]);
   const [teachers, setTeachers] = useState<User[]>([]);
   const [workHours, setWorkHours] = useState<Workhour[]>([]);
+  const [availabilities, setAvailabilities] = useState<avaibilities[]>([]);
 
   const fetchBranches = async () => {
     const fillieres = await getBranches();
@@ -90,8 +97,12 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchWorkHours = async (idTeacher: string) => {
     const workHours = await getWorkHoursByTeacher(idTeacher);
-    console.log("workHours", workHours);
     setWorkHours(workHours);
+  };
+
+  const fetchAvailabilities = async (idTeacher: string) => {
+    const avaibilities = await getAvailabilities(idTeacher);
+    setAvailabilities(avaibilities);
   };
 
   const value = {
@@ -104,11 +115,13 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     subjects,
     teachers,
     workHours,
+    availabilities,
     fetchBranches,
     fetchSchoolDays,
     fetchUsers,
     fetchClassrooms,
     fetchWorkHours,
+    fetchAvailabilities,
   };
 
   useEffect(() => {
