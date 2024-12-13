@@ -5,5 +5,6 @@ export default function (router) {
   router.post('/', workHourController.create);
   router.delete('/:id', workHourController.deleteWorkHour);
   router.get('/', workHourController.getWorkHoursByUser);
+  router.get('/:classId', workHourController.getWorkHoursByClass);
   return router;
 }
