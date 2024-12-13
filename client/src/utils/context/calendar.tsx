@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from "react";
 import { SemesterRange } from "../types/semester-range.interface";
 import { Event } from "../types/event.interface";
+import { RoleUser } from "../types/role-user.enum";
 
 interface CalendarContextType {
   semesterRange: SemesterRange | null;
@@ -19,6 +20,8 @@ interface CalendarContextType {
   setWorkhourEvent: React.Dispatch<React.SetStateAction<Event[]>>;
   selectedTeacherId: string;
   setSelectedTeacherId: React.Dispatch<React.SetStateAction<string>>;
+  displayedByRole: RoleUser;
+  setDisplayedByRole: React.Dispatch<React.SetStateAction<RoleUser>>;
 }
 
 const CalendarContext = createContext<CalendarContextType>({
@@ -38,6 +41,8 @@ const CalendarContext = createContext<CalendarContextType>({
   setWorkhourEvent: () => {},
   selectedTeacherId: "",
   setSelectedTeacherId: () => {},
+  displayedByRole: RoleUser.manager,
+  setDisplayedByRole: () => {},
 });
 
 export const CalendarProvider = ({
@@ -48,6 +53,10 @@ export const CalendarProvider = ({
   const [semesterRange, setSemesterRange] = useState<SemesterRange | null>(
     null
   );
+  const [displayedByRole, setDisplayedByRole] = useState<RoleUser>(
+    RoleUser.manager
+  );
+
   const [events, setEvents] = useState<Event[]>([]);
 
   const [showAdmin, setShowAdmin] = useState(false);
@@ -75,6 +84,8 @@ export const CalendarProvider = ({
     setWorkhourEvent,
     selectedTeacherId,
     setSelectedTeacherId,
+    displayedByRole,
+    setDisplayedByRole,
   };
 
   return (

@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function useRoleUser() {
-  const [role, setRole] = useState(null); 
+  const [role, setRole] = useState<RoleUser | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export default function useRoleUser() {
     }
 
     const user = JSON.parse(loggedInUser);
-    setRole(user.role);
+    setRole(user.role as RoleUser);
   }, []);
 
   const renderCalendar = {

@@ -5,12 +5,9 @@ import frLocale from "@fullcalendar/core/locales/fr";
 import interactionPlugin from "@fullcalendar/interaction";
 import { useDataContext } from "@/utils/context/data";
 import { useCalendarContext } from "@/utils/context/calendar";
-import { useState, useEffect } from "react";
-
-
+import { useEffect } from "react";
 
 export default function StudentCalendar() {
-
   const headerToolbarProps = {
     left: "prev,next today",
     center: "title",
@@ -19,7 +16,8 @@ export default function StudentCalendar() {
 
   const { schoolDays, fetchSchoolDays } = useDataContext();
 
-  const { semesterRange, setEvents, events, selectedClassId } = useCalendarContext();
+  const { semesterRange, setEvents, events, selectedClassId } =
+    useCalendarContext();
 
   const fillEvents = () => {
     setEvents([]);
@@ -29,8 +27,8 @@ export default function StudentCalendar() {
         title: schoolDay.class.name,
         start: schoolDay.date,
         end: undefined,
-        display: 'background',
-        color: '#b2b2b2',
+        display: "background",
+        color: "#b2b2b2",
       };
       setEvents((prev) => [...prev, event]);
     });
@@ -38,16 +36,15 @@ export default function StudentCalendar() {
 
   useEffect(() => {
     fillEvents();
-    console.log('ici', schoolDays)
   }, [schoolDays]);
 
   useEffect(() => {
-    fetchSchoolDays(selectedClassId)
+    fetchSchoolDays(selectedClassId);
   }, []);
 
   return (
-    <FullCalendar 
-      plugins={[dayGridPlugin, timeGridWeek, interactionPlugin]} 
+    <FullCalendar
+      plugins={[dayGridPlugin, timeGridWeek, interactionPlugin]}
       headerToolbar={headerToolbarProps}
       locale={frLocale}
       nowIndicator={true}
@@ -57,6 +54,6 @@ export default function StudentCalendar() {
       events={events}
       editable={true}
       validRange={semesterRange || undefined}
-  />
+    />
   );
 }

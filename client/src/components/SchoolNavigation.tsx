@@ -1,4 +1,4 @@
-import { ChangeEvent, use, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import LogoutButton from "./Logout";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { useDataContext } from "@/utils/context/data";
@@ -7,19 +7,22 @@ import { Event } from "@/utils/types/event.interface";
 import { Classes } from "@/utils/types/classes.interface";
 import { User } from "@/utils/types/user.interface";
 import useRoleUser from "@/utils/hook/useRoleUser";
-import { table } from "console";
+import { RoleUser } from "@/utils/types/role-user.enum";
+import { Backlog } from "@/utils/types/back-log.interface";
 
 export default function SchoolNavigation() {
-  const {
-    setSemesterRange,
-    setEvents,
-    showCalendarWorkHour,
-    setShowCalendarWorkHour,
-  } = useCalendarContext();
+  const { setSemesterRange } = useCalendarContext();
   const { fillieres, teachers, fetchSchoolDays, fetchWorkHours } =
     useDataContext();
 
   const { role } = useRoleUser();
+
+  const [classes, setClasses] = useState<Classes[]>();
+  const [backlogs, setBacklogs] = useState<Backlog[]>([]);
+  const [selectedBacklog, setSelectedBacklog] = useState("");
+
+  const userstr = localStorage.getItem("loggedInUser");
+  const user: User = userstr && JSON.parse(userstr);
 
   const {
     setShowAdmin,
@@ -31,17 +34,14 @@ export default function SchoolNavigation() {
     setSelectedFilliere,
     selectedTeacherId,
     setSelectedTeacherId,
+    displayedByRole,
+    setDisplayedByRole,
   } = useCalendarContext();
-
-  const [classes, setClasses] = useState<Classes[]>();
 
   const classesFromFilliere = (selectedFilliereValue: string) => {
     return fillieres.find((filliere) => filliere.id === selectedFilliereValue)
       ?.classes;
   };
-
-  const userstr = localStorage.getItem("loggedInUser");
-  const user : User = userstr && JSON.parse(userstr);
 
   const periodFromFilliere = (selectedFilliereValue: string) => {
     const periods = fillieres
@@ -173,25 +173,24 @@ export default function SchoolNavigation() {
 
   const getAllClasses = () => {
     return fillieres.flatMap((filliere) => filliere.classes);
-  }
-  const [backlogs, setBacklogs] = useState([]);
-  const [selectedBacklog, setSelectedBacklog] = useState("");
-  const getBacklog = (classId:string) => {
-    const backlog = fetch(process.env.NEXT_PUBLIC_URL_API + `/plannings/backlog/${classId}`);
+  };
+
+  const getBacklog = (classId: string) => {
+    const backlog = fetch(
+      process.env.NEXT_PUBLIC_URL_API + `/plannings/backlog/${classId}`
+    );
     return backlog.then((response) => response.json());
-  }
+  };
 
   useEffect(() => {
     if (!selectedBacklog) {
       setBacklogs([]);
       return;
-    };
+    }
     getBacklog(selectedBacklog).then((data) => {
       setBacklogs(data);
-    }
-    );
-  }
-  , [selectedBacklog]);
+    });
+  }, [selectedBacklog]);
 
   useEffect(() => {
     const classes = classesFromFilliere(selectedFilliere);
@@ -208,17 +207,10 @@ export default function SchoolNavigation() {
   }, [selectedClassId]);
 
   useEffect(() => {
-    if (showCalendarWorkHour) {
-      setEvents([]);
-      setSelectedClassId("");
-      setSelectedFilliere("");
-    }
-  }, [showCalendarWorkHour]);
-
-  useEffect(() => {
     if (selectedTeacherId) return;
 
     setSelectedTeacherId(teachers[0]?.id || "");
+    fetchWorkHours(teachers[0]?.id || "");
   }, [teachers]);
 
   useEffect(() => {
@@ -241,15 +233,40 @@ export default function SchoolNavigation() {
             className="w-12 h-12 rounded-full dark:bg-gray-500"
           />
           <div>
-            <h2 className="text-lg font-semibold">{user.firstname} {user.lastname}</h2>
+            <h2 className="text-lg font-semibold">
+              {user.firstname} {user.lastname}
+            </h2>
           </div>
         </div>
-        {!showCalendarWorkHour ? (
+
+        <div className="border-b border-gray-300 my-5 w-3/4 m-auto" />
+
+        <label className="block mb-2 text-lg font-medium text-gray-900 text-center">
+          Accéder au calendrier :
+        </label>
+        <select
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+          onChange={(e) => setDisplayedByRole(e.target.value as RoleUser)}
+        >
+          <option key={RoleUser.manager} value={RoleUser.manager}>
+            Responsable pédagogique
+          </option>
+          <option key={RoleUser.professor} value={RoleUser.professor}>
+            Professeur
+          </option>
+          <option key={RoleUser.student} value={RoleUser.student}>
+            Classe
+          </option>
+        </select>
+
+        <div className="border-b border-gray-300 my-5 w-3/4 m-auto" />
+
+        {displayedByRole === RoleUser.manager && (
           <ul className="pt-2 pb-4 space-y-1 text-sm">
             <li>
               <label
                 htmlFor="filliere"
-                className="block mb-2 text-sm font-medium text-gray-900 "
+                className="block mb-2 text-lg font-medium text-gray-900 text-center"
               >
                 Sélectionner une filière
               </label>
@@ -270,7 +287,7 @@ export default function SchoolNavigation() {
 
               {classes && !!selectedFilliere && (
                 <form onSubmit={submitForm}>
-                  <p className="block my-2 text-sm font-medium text-gray-900 ">
+                  <p className="block mt-6 text-lg font-medium text-gray-900 text-center">
                     Choisir une classe
                   </p>
                   <ul>
@@ -314,7 +331,7 @@ export default function SchoolNavigation() {
 
                   <label
                     htmlFor="period"
-                    className="block mb-2 text-sm font-medium text-gray-900 "
+                    className="block mt-6 mb-2 text-lg font-medium text-gray-900 text-center"
                   >
                     Sélectionner une période
                   </label>
@@ -343,49 +360,34 @@ export default function SchoolNavigation() {
               )}
             </li>
           </ul>
-        ) : (
-          <ul>
-            {teachers?.map((teacher) => (
-              <li key={teacher.id}>
-                <div className="flex p-2 rounded hover:bg-gray-100">
-                  <div className="flex items-center h-5">
-                    <input
-                      id={`input-index-${teacher.id}`}
-                      type="radio"
-                      name="teacher-radio"
-                      value={teacher.id}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
-                      checked={selectedTeacherId === teacher.id}
-                      onChange={(e) => {
-                        setSelectedTeacherId(e.target.value);
-                      }}
-                    />
-                  </div>
-                  <div className="ms-2 text-sm">
-                    <label
-                      htmlFor={`input-index-${teacher.id}`}
-                      className="font-medium text-gray-900"
-                    >
-                      <div className="font-bold">
-                        {teacher.firstname} {teacher.lastname}
-                      </div>
-                      {/* {teacher.restHour && (
-                        <p className="text-xs font-normal text-gray-500">
-                          Il reste {classe.restHour} heures à placé
-                        </p>
-                      )} */}
-                    </label>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
         )}
-      </div>
-        <div>
-          <h3 className="text-md font-semibold">Récapitulatif des heures</h3>
-          <br />
-          <select
+
+        {displayedByRole === RoleUser.professor && (
+          <>
+            <label className="block mt-6 mb-2 text-lg font-medium text-gray-900 text-center">
+              Choisir un professeur
+            </label>
+            <select
+              id="period"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+              onChange={(e) => setSelectedTeacherId(e.target.value)}
+            >
+              {teachers?.map((teacher) => (
+                <option key={teacher.id} value={teacher.id}>
+                  {teacher.firstname} {teacher.lastname}
+                </option>
+              ))}
+            </select>
+          </>
+        )}
+
+        {displayedByRole === RoleUser.student && (
+          <div>
+            <div>
+              <h3 className="text-md font-semibold mt-4 mb-3">
+                Récapitulatif des heures
+              </h3>
+              <select
                 id="classe"
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                 onChange={(e) => {
@@ -398,43 +400,38 @@ export default function SchoolNavigation() {
                     {classe.name}
                   </option>
                 ))}
-          </select>
-          <div>
-          {backlogs.length > 0 ? (
-            <>
-            {backlogs.map((backlog:any, index) => (
-              <div key={index} className="flex flex-col text-sm space-y-1 pt-3">
-                <span><b>{backlog.subjectName}</b></span>
-                <span>Quota d'heures : {backlog.subjectQuota}</span>
-                <span>Heures planifiées : {backlog.subjectHoursScheduled}</span>
-                <span>Heures restantes : {backlog.subjectRemainingHours}</span>
+              </select>
             </div>
-            
-            
-            ))}
-            </>
-          ) : (
-            <p className="mt-4 text-gray-600">Aucune classe sélectionner.</p>
-          )}
+            {backlogs.length > 0 ? (
+              <>
+                {backlogs.map((backlog, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col text-sm space-y-1 pt-3"
+                  >
+                    <span>
+                      <b>{backlog.subjectName}</b>
+                    </span>
+                    <span>Quota d&apos;heures : {backlog.subjectQuota}</span>
+                    <span>
+                      Heures planifiées : {backlog.subjectHoursScheduled}
+                    </span>
+                    <span>
+                      Heures restantes : {backlog.subjectRemainingHours}
+                    </span>
+                  </div>
+                ))}
+              </>
+            ) : (
+              <p className="mt-4 text-gray-600">Aucune classe sélectionner.</p>
+            )}
           </div>
-        </div>
+        )}
+      </div>
 
       <div>
         <div>
           <ul className="pt-4 pb-2 space-y-1 text-sm">
-            <li>
-              <button
-                rel="noopener noreferrer"
-                className="w-full flex items-center p-2 space-x-3 rounded-md bg-second hover:bg-second cursor-pointer"
-                onClick={() => setShowCalendarWorkHour(!showCalendarWorkHour)}
-              >
-                <span className="text-lg text-white">
-                  {showCalendarWorkHour
-                    ? "Placer jour de classe"
-                    : "Placer heure de cours"}
-                </span>
-              </button>
-            </li>
             <li>
               <a
                 rel="noopener noreferrer"
