@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, use, useEffect, useState } from "react";
 import LogoutButton from "./Logout";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { useDataContext } from "@/utils/context/data";
@@ -7,6 +7,7 @@ import { Event } from "@/utils/types/event.interface";
 import { Classes } from "@/utils/types/classes.interface";
 import { User } from "@/utils/types/user.interface";
 import useRoleUser from "@/utils/hook/useRoleUser";
+import { table } from "console";
 
 export default function SchoolNavigation() {
   const {
@@ -170,6 +171,28 @@ export default function SchoolNavigation() {
     }
   };
 
+  const getAllClasses = () => {
+    return fillieres.flatMap((filliere) => filliere.classes);
+  }
+  const [backlogs, setBacklogs] = useState([]);
+  const [selectedBacklog, setSelectedBacklog] = useState("");
+  const getBacklog = (classId:string) => {
+    const backlog = fetch(process.env.NEXT_PUBLIC_URL_API + `/plannings/backlog/${classId}`);
+    return backlog.then((response) => response.json());
+  }
+
+  useEffect(() => {
+    if (!selectedBacklog) {
+      setBacklogs([]);
+      return;
+    };
+    getBacklog(selectedBacklog).then((data) => {
+      setBacklogs(data);
+    }
+    );
+  }
+  , [selectedBacklog]);
+
   useEffect(() => {
     const classes = classesFromFilliere(selectedFilliere);
     if (classes && classes.length > 0) {
@@ -279,7 +302,7 @@ export default function SchoolNavigation() {
                               <div className="font-bold">{classe.name}</div>
                               {classe.restHour && (
                                 <p className="text-xs font-normal text-gray-500">
-                                  Il reste {classe.restHour} heures à placé
+                                  Il reste {classe.restHour} heures à placer
                                 </p>
                               )}
                             </label>
@@ -359,6 +382,42 @@ export default function SchoolNavigation() {
           </ul>
         )}
       </div>
+        <div>
+          <h3 className="text-md font-semibold">Récapitulatif des heures</h3>
+          <br />
+          <select
+                id="classe"
+                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                onChange={(e) => {
+                  setSelectedBacklog(e.target.value);
+                }}
+              >
+                <option value={""}>Choisir une classe</option>
+                {getAllClasses().map((classe) => (
+                  <option key={classe.id} value={classe.id}>
+                    {classe.name}
+                  </option>
+                ))}
+          </select>
+          <div>
+          {backlogs.length > 0 ? (
+            <>
+            {backlogs.map((backlog:any, index) => (
+              <div key={index} className="flex flex-col text-sm space-y-1 pt-3">
+                <span><b>{backlog.subjectName}</b></span>
+                <span>Quota d'heures : {backlog.subjectQuota}</span>
+                <span>Heures planifiées : {backlog.subjectHoursScheduled}</span>
+                <span>Heures restantes : {backlog.subjectRemainingHours}</span>
+            </div>
+            
+            
+            ))}
+            </>
+          ) : (
+            <p className="mt-4 text-gray-600">Aucune classe sélectionner.</p>
+          )}
+          </div>
+        </div>
 
       <div>
         <div>
@@ -371,8 +430,8 @@ export default function SchoolNavigation() {
               >
                 <span className="text-lg text-white">
                   {showCalendarWorkHour
-                    ? "Placé jour de classe"
-                    : "Placé heure de cours"}
+                    ? "Placer jour de classe"
+                    : "Placer heure de cours"}
                 </span>
               </button>
             </li>
