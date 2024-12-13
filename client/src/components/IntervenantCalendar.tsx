@@ -34,8 +34,9 @@ export default function IntervenantCalendar() {
         title: schoolDay.class.name,
         start: schoolDay.date,
         end: undefined,
+        display: 'background',
+        color: '#b2b2b2',
       };
-
       setEvents((prev) => [...prev, event]);
     });
   };

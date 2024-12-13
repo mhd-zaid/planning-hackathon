@@ -5,6 +5,7 @@ import { useDataContext } from "@/utils/context/data";
 import { Period } from "@/utils/types/period.interface";
 import { Event } from "@/utils/types/event.interface";
 import { Classes } from "@/utils/types/classes.interface";
+import { User } from "@/utils/types/user.interface";
 import useRoleUser from "@/utils/hook/useRoleUser";
 
 export default function SchoolNavigation() {
@@ -32,6 +33,9 @@ export default function SchoolNavigation() {
     return fillieres.find((filliere) => filliere.id === selectedFilliereValue)
       ?.classes;
   };
+
+  const userstr = localStorage.getItem("loggedInUser");
+  const user : User = userstr && JSON.parse(userstr);
 
   const periodFromFilliere = (selectedFilliereValue: string) => {
     const periods = fillieres
@@ -196,12 +200,12 @@ export default function SchoolNavigation() {
       <div>
         <div className="flex items-center p-2 space-x-4">
           <img
-            src="https://source.unsplash.com/100x100/?portrait"
+            src="https://source.unsplash.com/100x100/portrait"
             alt=""
             className="w-12 h-12 rounded-full dark:bg-gray-500"
           />
           <div>
-            <h2 className="text-lg font-semibold"></h2>
+            <h2 className="text-lg font-semibold">{user.firstname} {user.lastname}</h2>
           </div>
         </div>
         {!showCalendarWorkHour && (
