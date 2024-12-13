@@ -208,6 +208,14 @@ export default function IntervenantNavigation() {
               Enregistrer les jours
             </button>
           </li>
+          <li>
+            <button
+              onClick={() => {}}
+              className="w-full text-center text-white p-2 my-5 rounded-lg bg-first"
+            >
+              Suggestion des crénaux
+            </button>
+          </li>
         </ul>
       </div>
 
