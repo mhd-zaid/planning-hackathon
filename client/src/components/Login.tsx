@@ -1,17 +1,18 @@
+"use client";
+
 import React, { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { User } from "@/utils/types/user.interface";
-import { useDataContext } from "@/utils/context/data";
+import getUsers from "@/utils/api/getUsers";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const router = useRouter();
 
-  const { users } = useDataContext();
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const users = await getUsers();
 
     const user = users.find((u) => u.email === email);
 

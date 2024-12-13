@@ -1,10 +1,11 @@
+import { useCalendarContext } from "@/utils/context/calendar";
 import { useDataContext } from "@/utils/context/data";
 import { Classes } from "@/utils/types/classes.interface";
-import { RoleUser } from "@/utils/types/role-user.enum";
 import { SubjectClasses } from "@/utils/types/subject-classes.interface";
-import { Subject } from "@/utils/types/subject.interface";
+import { Teacher } from "@/utils/types/teacher.interface";
 import { DateClickArg } from "@fullcalendar/interaction/index.js";
-import { Dispatch, SetStateAction, use, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { uuidv4 } from "uuidv7";
 
 type ModalWorkHourProps = {
   showModal: boolean;
@@ -17,9 +18,10 @@ export default function ModalWorkHour({
   setShowModal,
   eventWorkHour,
 }: ModalWorkHourProps) {
-  const { users, classrooms, classes, subjectClasses } = useDataContext();
-  const [selectedIntervenant, setSelectedIntervenant] = useState<string>("");
-  const [selectedClassroom, setSelectedClassroom] = useState<string>("");
+  const { classes, subjectClasses, teachers } = useDataContext();
+  const { workHourEvent, setWorkhourEvent, selectedTeacherId } =
+    useCalendarContext();
+
   const [selectedClassId, setSelectedClassId] = useState<string>("");
   const [selectedSubjectClasseId, setSelectedSubjectClasseId] =
     useState<string>("");
@@ -28,9 +30,7 @@ export default function ModalWorkHour({
   const [selectedSubjectClasse, setSelectedSubjectClasse] =
     useState<SubjectClasses>();
 
-  const intervenants = users
-    .map((user) => (user.role === RoleUser.professor ? user : null))
-    .filter((user) => user !== null);
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,58 +40,75 @@ export default function ModalWorkHour({
       return;
     }
 
-    if (!selectedIntervenant) {
-      alert("Veuillez selectionner un intervenant");
-      return;
-    }
-
-    if (!selectedClassroom) {
-      alert("Veuillez selectionner une salle de classe");
-      return;
-    }
-
     if (!selectedClassId) {
       alert("Veuillez selectionner une classe");
       return;
     }
 
-    // const body = {
-    //   workhours: [
-    //     {
-    //       subjectClassId: selectedClass,
-    //       beginDate: eventWorkHour.dateStr.split("+")[0],
-    //       endDate: () => {
-    //         const date = new Date(eventWorkHour.dateStr.split("+")[0]);
-    //         date.setHours(date.getHours() + 1);
-    //         return date.toISOString();
-    //       },
-    //     },
-    //   ],
-    // };
+    if (!selectedSubjectClasseId) {
+      alert("Veuillez selectionner une matière");
+      return;
+    }
 
-    // console.log(body);
+    const body = [
+      {
+        subjectClassId: selectedSubjectClasseId,
+        beginDate: eventWorkHour.dateStr.split("+")[0],
+        endDate: (() => {
+          const beginDate = new Date(eventWorkHour.dateStr.split("+")[0] + "Z");
+          beginDate.setHours(beginDate.getHours() + 1);
+          return beginDate.toISOString().split(".")[0];
+        })(),
+      },
+    ];
 
-    // try {
-    //   await fetch(`${process.env.NEXT_PUBLIC_URL_API}/work-hours`, {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(body),
-    //   });
-    // } catch (error) {
-    //   console.log(error);
-    // }
+    try {
+      const resWorkHours = await fetch(
+        `${process.env.NEXT_PUBLIC_URL_API}/work-hours`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        }
+      );
+
+      if (resWorkHours.ok) {
+        setWorkhourEvent([
+          ...workHourEvent,
+          {
+            id: `NEW-${uuidv4()}`,
+            title: "Je suis dispo",
+            start: eventWorkHour.dateStr,
+            end: undefined,
+          },
+        ]);
+
+        setShowModal(false);
+      }
+
+      console.log(resWorkHours);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
     if (selectedClassId) {
-      // const class
       setSelectedClasse(
         classes.find((classe) => classe.id === selectedClassId)
       );
     }
   }, [selectedClassId]);
+
+  useEffect(() => {
+    if (selectedTeacherId) {
+      setSelectedTeacher(
+        teachers.find((teacher) => teacher.id === selectedTeacherId) || null
+      );
+    }
+  }, [selectedTeacherId]);
 
   useEffect(() => {
     if (selectedSubjectClasseId) {
@@ -115,49 +132,10 @@ export default function ModalWorkHour({
           <div className="relative bg-white rounded-lg shadow">
             <div className="flex flex-col gap-5 items-center justify-between p-4 md:p-5 border-b rounded-t">
               <h3 className="text-xl font-semibold text-gray-900 self-start">
-                Ajouter une heure de cours
+                Ajouter une heure de cours pour monsieur{" "}
+                {selectedTeacher?.firstname} {selectedTeacher?.lastname}
               </h3>
               <div className="flex flex-col gap-5">
-                {/* <div>
-                  <label
-                    htmlFor="filliere"
-                    className="block mb-2 text-sm font-medium text-gray-900 "
-                  >
-                    Sélectionner un intervenant
-                  </label>
-                  <select
-                    id="filliere"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                    onChange={(e) => setSelectedIntervenant(e.target.value)}
-                  >
-                    <option value={""}>Choisir une intervenant</option>
-                    {intervenants.map((intervenant) => (
-                      <option key={intervenant.id} value={intervenant.id}>
-                        {intervenant.firstname} - {intervenant.lastname}
-                      </option>
-                    ))}
-                  </select>
-                </div> */}
-                {/* <div>
-                  <label
-                    htmlFor="filliere"
-                    className="block mb-2 text-sm font-medium text-gray-900 "
-                  >
-                    Sélectionner une salle de classe
-                  </label>
-                  <select
-                    id="filliere"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                    onChange={(e) => setSelectedClassroom(e.target.value)}
-                  >
-                    <option value={""}>Choisir une salle de classe</option>
-                    {classrooms.map((classroom) => (
-                      <option key={classroom.id} value={classroom.id}>
-                        {classroom.name}
-                      </option>
-                    ))}
-                  </select>
-                </div> */}
                 <div>
                   <label
                     htmlFor="filliere"
@@ -204,10 +182,10 @@ export default function ModalWorkHour({
                   </div>
                 )}
 
-                {selectedSubjectClasse && (
+                {selectedClassId && selectedSubjectClasse && (
                   <p>
-                    Professeur : {selectedSubjectClasse.teacher.firstName}{" "}
-                    {selectedSubjectClasse.teacher.lastName}
+                    Professeur : {selectedSubjectClasse.teacher.firstname}{" "}
+                    {selectedSubjectClasse.teacher.lastname}
                   </p>
                 )}
               </div>

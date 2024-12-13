@@ -1,5 +1,5 @@
 export interface Teacher {
   id: string;
-  firstName: string;
-  lastName: string;
+  firstname: string;
+  lastname: string;
 }

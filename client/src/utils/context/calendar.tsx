@@ -17,6 +17,8 @@ interface CalendarContextType {
   setShowCalendarWorkHour: React.Dispatch<React.SetStateAction<boolean>>;
   workHourEvent: Event[];
   setWorkhourEvent: React.Dispatch<React.SetStateAction<Event[]>>;
+  selectedTeacherId: string;
+  setSelectedTeacherId: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const CalendarContext = createContext<CalendarContextType>({
@@ -34,6 +36,8 @@ const CalendarContext = createContext<CalendarContextType>({
   setShowCalendarWorkHour: () => {},
   workHourEvent: [],
   setWorkhourEvent: () => {},
+  selectedTeacherId: "",
+  setSelectedTeacherId: () => {},
 });
 
 export const CalendarProvider = ({
@@ -52,6 +56,7 @@ export const CalendarProvider = ({
   const [selectedClassId, setSelectedClassId] = useState<string>("");
   const [showCalendarWorkHour, setShowCalendarWorkHour] = useState(false);
   const [workHourEvent, setWorkhourEvent] = useState<Event[]>([]);
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
 
   const value = {
     semesterRange,
@@ -68,6 +73,8 @@ export const CalendarProvider = ({
     setShowCalendarWorkHour,
     workHourEvent,
     setWorkhourEvent,
+    selectedTeacherId,
+    setSelectedTeacherId,
   };
 
   return (

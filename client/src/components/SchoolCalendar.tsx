@@ -8,7 +8,6 @@ import { DateSelectArg, EventClickArg } from "@fullcalendar/core/index.js";
 import { useDataContext } from "@/utils/context/data";
 import { useEffect, useState } from "react";
 import { uuidv4 } from "uuidv7";
-import { init } from "next/dist/compiled/webpack/webpack";
 import ModalWorkHour from "./ModalWorkHour";
 
 export default function SchoolCalendar() {
@@ -22,7 +21,7 @@ export default function SchoolCalendar() {
     setWorkhourEvent,
   } = useCalendarContext();
 
-  const { fillieres, schoolDays } = useDataContext();
+  const { fillieres, schoolDays, workHours } = useDataContext();
 
   const headerToolbarProps = {
     left: "prev,next today",
@@ -45,6 +44,21 @@ export default function SchoolCalendar() {
       };
 
       setEvents((prev) => [...prev, event]);
+    });
+  };
+
+  const fillWorkHoursEvents = () => {
+    setWorkhourEvent([]);
+
+    workHours.forEach((workHour) => {
+      const event = {
+        id: workHour.id,
+        title: "Professeur",
+        start: workHour.beginDate,
+        end: workHour.endDate,
+      };
+
+      setWorkhourEvent((prev) => [...prev, event]);
     });
   };
 
@@ -175,6 +189,26 @@ export default function SchoolCalendar() {
     }
   };
 
+  const deleteWorkHour = async (e: EventClickArg) => {
+    setWorkhourEvent(
+      workHourEvent.filter((event) => event.id !== e.event._def.publicId)
+    );
+
+    try {
+      await fetch(
+        `${process.env.NEXT_PUBLIC_URL_API}/work-hours/${e.event._def.publicId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const selectDateSchoolDay = (event: DateSelectArg) => {
     const dateStart = new Date(event.startStr);
     const dateEnd = new Date(event.endStr);
@@ -198,16 +232,6 @@ export default function SchoolCalendar() {
     setEventWorkHour(eventWorkHour);
 
     setShowModal(true);
-
-    // setWorkhourEvent([
-    //   ...workHourEvent,
-    //   {
-    //     id: `NEW-${uuidv4()}`,
-    //     title: "Je suis dispo",
-    //     start: info.dateStr,
-    //     end: undefined,
-    //   },
-    // ]);
   };
 
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -215,6 +239,10 @@ export default function SchoolCalendar() {
   useEffect(() => {
     fillEvents();
   }, [schoolDays]);
+
+  useEffect(() => {
+    fillWorkHoursEvents();
+  }, [workHours]);
 
   return showCalendarWorkHour ? (
     <>
@@ -234,7 +262,7 @@ export default function SchoolCalendar() {
         validRange={semesterRange || undefined}
         selectable={!!semesterRange}
         dateClick={dateClickWorkHour}
-        // eventClick={deleteSchoolDay}
+        eventClick={deleteWorkHour}
         // select={(info) => selectDateWorkHour(info)}
         initialView="timeGridWeek"
       />

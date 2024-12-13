@@ -10,6 +10,9 @@ import { Classrooms } from "../types/classrooms.interface";
 import { Classes } from "../types/classes.interface";
 import { SubjectClasses } from "../types/subject-classes.interface";
 import { Subject } from "../types/subject.interface";
+import { RoleUser } from "../types/role-user.enum";
+import { getWorkHoursByTeacher } from "../api/getWorkHoursByTeacher";
+import { Workhour } from "../types/work-hour.interface";
 
 interface DataContextType {
   fillieres: Filliere[];
@@ -19,9 +22,12 @@ interface DataContextType {
   classes: Classes[];
   subjectClasses: SubjectClasses[];
   subjects: Subject[];
+  teachers: User[];
+  workHours: Workhour[];
   fetchBranches: () => void;
   fetchSchoolDays: (idClass: string) => void;
   fetchUsers: () => void;
+  fetchWorkHours: (idTeacher: string) => void;
 }
 
 const DataContext = createContext<DataContextType>({
@@ -32,9 +38,12 @@ const DataContext = createContext<DataContextType>({
   classes: [],
   subjectClasses: [],
   subjects: [],
+  teachers: [],
+  workHours: [],
   fetchBranches: () => {},
   fetchSchoolDays: () => {},
   fetchUsers: () => {},
+  fetchWorkHours: () => {},
 });
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
@@ -45,6 +54,8 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const [classes, setClasses] = useState<Classes[]>([]);
   const [subjectClasses, setSubjectClasses] = useState<SubjectClasses[]>([]);
   const [subjects, setSubject] = useState<Subject[]>([]);
+  const [teachers, setTeachers] = useState<User[]>([]);
+  const [workHours, setWorkHours] = useState<Workhour[]>([]);
 
   const fetchBranches = async () => {
     const fillieres = await getBranches();
@@ -65,12 +76,22 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchUsers = async () => {
     const users = await getUsers();
+    const teachers = users
+      .map((user) => (user.role === RoleUser.professor ? user : null))
+      .filter((teacher) => teacher !== null);
+    setTeachers(teachers);
     setUsers(users);
   };
 
   const fetchClassrooms = async () => {
     const classrooms = await getClassrooms();
     setClassrooms(classrooms);
+  };
+
+  const fetchWorkHours = async (idTeacher: string) => {
+    const workHours = await getWorkHoursByTeacher(idTeacher);
+    console.log("workHours", workHours);
+    setWorkHours(workHours);
   };
 
   const value = {
@@ -81,10 +102,13 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     classes,
     subjectClasses,
     subjects,
+    teachers,
+    workHours,
     fetchBranches,
     fetchSchoolDays,
     fetchUsers,
     fetchClassrooms,
+    fetchWorkHours,
   };
 
   useEffect(() => {
