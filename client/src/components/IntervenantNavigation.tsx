@@ -10,12 +10,8 @@ import useRoleUser from "@/utils/hook/useRoleUser";
 import { User } from "@/utils/types/user.interface";
 import { Classes } from "@/utils/types/classes.interface";
 import { Event } from "@/utils/types/event.interface";
+import { avaibilities } from "@/utils/types/avaibilities.interface";
 
-
-enum ValueSemester {
-  SEMESTER_ONE = "1",
-  SEMESTER_TWO = "2",
-}
 
 export default function IntervenantNavigation() {
 
@@ -24,16 +20,6 @@ export default function IntervenantNavigation() {
   const { setSemesterRange, selectedClassId, setSelectedClassId, events } = useCalendarContext();
 
   const { role } = useRoleUser()
-
-  const semesterOne = {
-    start: "2024-01-01",
-    end: "2024-06-30",
-  };
-
-  const semesterTwo = {
-    start: "2024-07-01",
-    end: "2024-12-31",
-  };
 
   const getDatesBetween = (startDate: string, endDate: string) => {
     const dates = [];
@@ -94,22 +80,50 @@ export default function IntervenantNavigation() {
     return baseHour - dayAlreadyPlaced * HOUR_BY_DAY;
   };
 
-  const onChangeSemester = (e: ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value as ValueSemester;
-    switch (value) {
-      case ValueSemester.SEMESTER_ONE:
-        setSemesterRange(semesterOne);
-        break;
-      case ValueSemester.SEMESTER_TWO:
-        setSemesterRange(semesterTwo);
-        break;
-      default:
-        break;
-    }
-  };
-
   const userstr = localStorage.getItem("loggedInUser");
   const user : User = userstr && JSON.parse(userstr);
+
+  const formatAvaibilities = (newEvent: Event[]) => {
+     const formatedEvent = newEvent.flatMap(event => 
+     ([{
+      beginDate: event.start + "T08:00:00",
+      endDate: event.start + "T12:00:00" ,
+      isFavorite: false,
+     }, {
+      beginDate: event.start + "T13:00:00",
+      endDate: event.start + "T18:00:00",
+      isFavorite: false,
+     }])
+     ) 
+     return formatedEvent
+  }
+
+  const postAvaibilities = async(events: Event[]) => {
+    const newEvent = events.map(event => {
+      if(event.id.startsWith("new-")) {
+        return event
+      } else {
+        return null
+      }
+    }).filter(event => event) as Event[]
+    if(!newEvent) return
+    const body = formatAvaibilities(newEvent)
+
+    try {
+      await fetch(
+        `${process.env.NEXT_PUBLIC_URL_API}/availabilities/${user.id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        }
+      );
+    } catch (error) {
+      console.log("error", error);
+    }
+  }
 
   const teacherClasses = classes.flatMap((classe) => classe.subjectClasses.map((subjectClasse) => {
     if(subjectClasse.teacher.id === user.id){
@@ -148,10 +162,10 @@ export default function IntervenantNavigation() {
           </div>
         </div>
         <ul><br />
-          <p>Mes classes : </p>
+          <p className="text-lg">Mes classes : </p>
           {teacherClasses?.map((classe: Classes) => (
             <li key={classe.id}>
-              <div className="flex p-2 rounded hover:bg-gray-100">
+              <div className="flex p-2 rounded hover:bg-gray-100 my-4">
                 <div className="flex items-center h-5">
                   <input
                     id={`input-index-${classe.name}`}
@@ -185,6 +199,14 @@ export default function IntervenantNavigation() {
               </div>
             </li>
           ))}
+          <li>
+          <button
+            onClick={() => postAvaibilities(events)}
+            className="w-full text-center p-2 my-5 rounded-lg bg-first"
+          >
+            Enregistrer les jours
+          </button>
+          </li>
         </ul>
       </div>
       

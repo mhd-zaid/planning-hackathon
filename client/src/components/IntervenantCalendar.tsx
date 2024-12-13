@@ -6,6 +6,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import { useState, useEffect } from "react";
 import { useDataContext } from "@/utils/context/data";
 import { useCalendarContext } from "@/utils/context/calendar";
+import { uuidv4 } from "uuidv7";
 
 interface Event {
   title: string;
@@ -20,7 +21,7 @@ export default function IntervenantCalendar() {
     right: "timeGridWeek dayGridMonth",
   };
 
-  const { schoolDays, fetchSchoolDays } = useDataContext();
+  const { schoolDays, fetchSchoolDays, fetchWorkHour } = useDataContext();
 
   const { semesterRange,setEvents, events, selectedClassId } = useCalendarContext();
 
@@ -35,7 +36,7 @@ export default function IntervenantCalendar() {
         start: schoolDay.date,
         end: undefined,
         display: 'background',
-        color: '#b2b2b2',
+        color: '#d9ffb2',
       };
       setEvents((prev) => [...prev, event]);
     });
@@ -48,6 +49,7 @@ export default function IntervenantCalendar() {
 
   useEffect(() => {
     fetchSchoolDays(selectedClassId)
+    fetchWorkHour(userAgent.id)
   }, []);
 
   return (
@@ -63,8 +65,8 @@ export default function IntervenantCalendar() {
       headerToolbar={headerToolbarProps}
       locale={frLocale}
       nowIndicator={true}
-      height={"100%"}
-      selectable={true}
+      height={"89%"}
+      selectable={false}
       dragScroll={true}
       events={events}
       editable={true}
@@ -72,8 +74,18 @@ export default function IntervenantCalendar() {
       select={(info) =>
         setEvents([
           ...events,
-          { id: 'test', title: "Jour dispo", start: info.startStr, end: info.endStr },
+          { id: 'test', title: "Disponibilité ", start: info.startStr, end: info.endStr },
         ])
+      }
+      dateClick={(info) => {
+        const dateFromApi = events.sort((event => event.id.startsWith("new-")? -1:1)).find((event) => event.start === info.dateStr)
+        if(!dateFromApi || dateFromApi.id.startsWith("new-")) return
+
+        setEvents([
+          ...events,
+          { id: `new-${uuidv4()}`, title: "Disponibilité ", start: info.dateStr, end: undefined },
+        ])
+      }
       }
     />
   );

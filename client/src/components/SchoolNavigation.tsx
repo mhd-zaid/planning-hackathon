@@ -322,8 +322,8 @@ export default function SchoolNavigation() {
               >
                 <span className="text-lg text-white">
                   {showCalendarWorkHour
-                    ? "Placé jour de classe"
-                    : "Placé heure de cours"}
+                    ? "Placer jour de classe"
+                    : "Placer heure de cours"}
                 </span>
               </button>
             </li>
