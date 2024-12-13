@@ -9,6 +9,7 @@ import { useDataContext } from "@/utils/context/data";
 import { useEffect, useState } from "react";
 import { uuidv4 } from "uuidv7";
 import ModalWorkHour from "./ModalWorkHour";
+import ModalDeleteWorkHour from "./ModalDeleteWorkHour";
 
 export default function SchoolCalendar() {
   const {
@@ -28,6 +29,8 @@ export default function SchoolCalendar() {
     center: "title",
     right: `${showCalendarWorkHour ? "timeGridWeek" : "dayGridMonth"}`,
   };
+
+  const [idToDelete, setIdToDelete] = useState<string>("");
 
   const selectedClasse = fillieres
     .flatMap((filliere) => filliere.classes)
@@ -190,23 +193,8 @@ export default function SchoolCalendar() {
   };
 
   const deleteWorkHour = async (e: EventClickArg) => {
-    setWorkhourEvent(
-      workHourEvent.filter((event) => event.id !== e.event._def.publicId)
-    );
-
-    try {
-      await fetch(
-        `${process.env.NEXT_PUBLIC_URL_API}/work-hours/${e.event._def.publicId}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    } catch (error) {
-      console.log(error);
-    }
+    setShowModalDelete(true);
+    setIdToDelete(e.event._def.publicId);
   };
 
   const selectDateSchoolDay = (event: DateSelectArg) => {
@@ -235,6 +223,7 @@ export default function SchoolCalendar() {
   };
 
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showModalDelete, setShowModalDelete] = useState<boolean>(false);
 
   useEffect(() => {
     fillEvents();
@@ -271,6 +260,12 @@ export default function SchoolCalendar() {
         showModal={showModal}
         setShowModal={setShowModal}
         eventWorkHour={eventWorkHour}
+      />
+
+      <ModalDeleteWorkHour
+        showModalDelete={showModalDelete}
+        setShowModalDelete={setShowModalDelete}
+        idToDelete={idToDelete}
       />
     </>
   ) : (

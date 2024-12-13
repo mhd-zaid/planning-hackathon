@@ -255,7 +255,7 @@ const getWorkHoursByUser = async (req, res) => {
     }
 
     const workHours = await db.WorkHour.findAll({
-      attributes: ["beginDate", "endDate"],
+      attributes: ["beginDate", "endDate", "id"],
       include: [
         {
           model: db.SubjectClass,
