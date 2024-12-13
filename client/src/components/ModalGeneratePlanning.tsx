@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import { ClipLoader } from "react-spinners"; // Importation du spinner
 
 interface ModalGeneratePlanningProps {
   isOpen: boolean;
@@ -20,7 +21,7 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
     setIsLoading(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_URL_API}/plannings/63b9e30f-e87f-4e5c-acb2-3db6ac65bf79?start=2024-12-01&end=2024-12-31`,
+        `${process.env.NEXT_PUBLIC_URL_API}/plannings/74061629-546b-4583-8e74-bcac03989088?start=2024-12-01&end=2024-12-31`,
         {
           method: "GET",
           headers: {
@@ -57,7 +58,7 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
       const mappedWorkHours = mapWorkHoursToApiFormat(potentialWorkHours);
 
       console.log("Mapped Work Hours:", mappedWorkHours);
-  
+
       // Faire la requête API pour créer les work hours
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/work-hours`, {
         method: "POST",
@@ -66,11 +67,11 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
         },
         body: JSON.stringify(mappedWorkHours), // Envoyer les données mappées
       });
-  
+
       if (!response.ok) {
         throw new Error("Erreur lors de la création des horaires.");
       }
-  
+
       const data = await response.json();
       console.log("API Response:", data);
       toast.success("Les heures de travail ont été générées avec succès!");
@@ -82,6 +83,7 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
       setIsLoading(false);
     }
   };
+
   // Réinitialiser la modal à chaque fermeture
   useEffect(() => {
     if (!isOpen) {
@@ -97,11 +99,14 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-[600px] shadow-lg"> {/* Augmenter la largeur de la modal */}
+      <div className="bg-white rounded-lg p-6 w-[600px] shadow-lg">
         {/* Première partie de la modal (sélecteurs de dates et bouton de confirmation) */}
         {potentialWorkHours.length === 0 && (
           <>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Sélectionnez une plage de dates</h2>
+            dd
+            <ClipLoader size={20} color="#fff" />
+
 
             <div className="mb-4">
               <label htmlFor="start-date" className="block text-sm font-medium text-gray-700 mb-2">
@@ -135,7 +140,7 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
         {potentialWorkHours.length > 0 && (
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Heures de travail potentielles</h3>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-64 overflow-y-auto">
               {potentialWorkHours.map((workHour, index) => (
                 <div key={index} className="flex justify-between items-center border p-2 rounded-md shadow-sm">
                   <div>
@@ -143,8 +148,12 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
                       <strong>{new Date(workHour.startDate).toLocaleString()}</strong> -{" "}
                       <strong>{new Date(workHour.endDate).toLocaleString()}</strong>
                     </p>
-                    <p>Professeur : {workHour.teacher.firstname} {workHour.teacher.lastname}</p>
-                    <p>Matière : <span style={{ color: workHour.subject.color }}>{workHour.subject.name}</span></p>
+                    <p>
+                      Professeur : {workHour.teacher.firstname} {workHour.teacher.lastname}
+                    </p>
+                    <p>
+                      Matière : <span style={{ color: workHour.subject.color }}>{workHour.subject.name}</span>
+                    </p>
                   </div>
                   <button
                     className="text-red-500 hover:text-red-700"
@@ -174,7 +183,7 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
               }}
               disabled={isConfirmDisabled}
             >
-              {isLoading ? "Chargement..." : "Confirmer"}
+              {isLoading ? <ClipLoader size={20} color="#fff" /> : "Confirmer"} {/* Spinner ici */}
             </button>
           )}
         </div>
@@ -186,7 +195,7 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
               onClick={handleConfirm}
               disabled={isLoading}
             >
-              {isLoading ? "Chargement..." : "Valider"}
+              {isLoading ? <ClipLoader size={20} color="#fff" /> : "Valider"} {/* Spinner ici aussi */}
             </button>
           </div>
         )}
@@ -196,12 +205,11 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
 };
 
 const mapWorkHoursToApiFormat = (workHours: any[]) => {
-    return workHours.map((workHour) => ({
-      beginDate: new Date(workHour.startDate).toISOString(),
-      endDate: new Date(workHour.endDate).toISOString(),
-      subjectClassId: workHour.subjectClassId,
-    }));
-  };
-  
+  return workHours.map((workHour) => ({
+    beginDate: new Date(workHour.startDate).toISOString(),
+    endDate: new Date(workHour.endDate).toISOString(),
+    subjectClassId: workHour.subjectClassId,
+  }));
+};
 
 export default ModalGeneratePlanning;
