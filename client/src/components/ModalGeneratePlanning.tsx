@@ -15,12 +15,10 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
   const [potentialWorkHours, setPotentialWorkHours] = useState<any[]>([]); // Tableau pour stocker les horaires potentiels récupérés
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Définir si le bouton "Confirmer" doit être activé ou non
   const isConfirmDisabled = !startDate || !endDate || new Date(startDate) > new Date(endDate) || isLoading;
 
-  // Fonction pour récupérer les potential work hours après avoir confirmé les dates
   const fetchPotentialWorkHours = async () => {
-    // setIsLoading(true);
+    setIsLoading(true);
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_URL_API}/plannings/${classId}?start=${startDate}&end=${endDate}`,
@@ -45,29 +43,24 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
     }
   };
 
-  // Fonction pour supprimer un créneau de la liste des horaires potentiels
   const handleDeleteWorkHour = (index: number) => {
     const newWorkHours = [...potentialWorkHours];
     newWorkHours.splice(index, 1);
     setPotentialWorkHours(newWorkHours);
   };
 
-  // Fonction pour valider la création des work hours
   const handleConfirm = async () => {
     setIsLoading(true);
     try {
-      // Mapper les horaires potentiels au format attendu par l'API
       const mappedWorkHours = mapWorkHoursToApiFormat(potentialWorkHours);
-
       console.log("Mapped Work Hours:", mappedWorkHours);
 
-      // Faire la requête API pour créer les work hours
       const response = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/work-hours`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(mappedWorkHours), // Envoyer les données mappées
+        body: JSON.stringify(mappedWorkHours),
       });
 
       if (!response.ok) {
@@ -78,7 +71,7 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
       console.log("API Response:", data);
       toast.success("Les heures de travail ont été générées avec succès!");
       onWorkHoursValidated();
-      onClose(); // Fermer la modal après la validation
+      onClose();
     } catch (error) {
       console.error("Erreur lors de la création des horaires:", error);
       toast.error("Une erreur est survenue lors de la création des horaires.");
@@ -87,10 +80,8 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
     }
   };
 
-  // Réinitialiser la modal à chaque fermeture
   useEffect(() => {
     if (!isOpen) {
-      // Réinitialiser tous les états lorsque la modal est fermée
       setStartDate("");
       setEndDate("");
       setPotentialWorkHours([]);
@@ -102,8 +93,15 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-[600px] shadow-lg">
-        {/* Première partie de la modal (sélecteurs de dates et bouton de confirmation) */}
+      <div className="bg-white rounded-lg p-6 w-[600px] shadow-lg relative">
+        {/* Croix rouge pour fermer */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-red-500 hover:text-red-700 text-lg"
+        >
+          ❌
+        </button>
+
         {potentialWorkHours.length === 0 && (
           <>
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Génération de planning</h2>
@@ -135,7 +133,6 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
           </>
         )}
 
-        {/* Affichage des potential work hours une fois les dates confirmées */}
         {potentialWorkHours.length > 0 && (
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Heures de travail potentielles</h3>
@@ -167,22 +164,13 @@ const ModalGeneratePlanning: React.FC<ModalGeneratePlanningProps> = ({ isOpen, o
         )}
 
         <div className="flex justify-end">
-          <button
-            className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md mr-2"
-            onClick={onClose}
-            disabled={isLoading}
-          >
-            Annuler
-          </button>
           {potentialWorkHours.length === 0 && (
             <button
               className={`px-4 py-2 rounded-md text-white ${isConfirmDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"}`}
-              onClick={() => {
-                fetchPotentialWorkHours();
-              }}
+              onClick={fetchPotentialWorkHours}
               disabled={isConfirmDisabled}
             >
-              {isLoading ? <ClipLoader size={20} color="#fff" /> : "Confirmer"} {/* Spinner ici */}
+              {isLoading ? <ClipLoader size={20} color="#fff" /> : "Confirmer"}
             </button>
           )}
         </div>
