@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { useDataContext } from "@/utils/context/data";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { uuidv4 } from "uuidv7";
+import { User } from "@/utils/types/user.interface";
 
 interface Event {
   title: string;
@@ -21,7 +22,10 @@ export default function IntervenantCalendar() {
     right: "timeGridWeek dayGridMonth",
   };
 
-  const { schoolDays, fetchSchoolDays, fetchWorkHour } = useDataContext();
+  const userstr = localStorage.getItem("loggedInUser");
+  const user: User = userstr && JSON.parse(userstr);
+
+  const { schoolDays, fetchSchoolDays, fetchAvailabilities, availabilities } = useDataContext();
 
   const { semesterRange,setEvents, events, selectedClassId } = useCalendarContext();
 
@@ -42,26 +46,35 @@ export default function IntervenantCalendar() {
     });
   };
 
+  const fillAvailabilities = () => {
+    availabilities.forEach((availabilities) => {
+      const event = {
+        id: availabilities.id || '',
+        title: 'Disponibilité',
+        start: availabilities.beginDate,
+        end: undefined,
+      };
+      setEvents((prev) => [...prev, event]);
+    });
+  };
+
   useEffect(() => {
     fillEvents();
-    console.log('ici', schoolDays)
-  }, [schoolDays]);
+    }, [schoolDays]);
+
+  useEffect(() => {
+    fillAvailabilities();
+    console.log(availabilities)
+  }, [availabilities]);
 
   useEffect(() => {
     fetchSchoolDays(selectedClassId)
-    fetchWorkHour(userAgent.id)
+    fetchAvailabilities(user.id)
   }, []);
 
   return (
     <FullCalendar
       plugins={[dayGridPlugin, timeGridWeek, interactionPlugin]}
-      // slotMinTime="08:00:00"
-      // slotMaxTime="18:00:00"
-      // events={[
-      //   { title: 'Matinée', start: '2024-12-12T08:00:00', end: '2024-12-12T12:00:00' },
-      //   { title: 'Après-midi', start: '2024-12-12T13:00:00', end: '2024-12-12T18:00:00' },
-      // ]}
-      // slotDuration="00:30:00"
       headerToolbar={headerToolbarProps}
       locale={frLocale}
       nowIndicator={true}
