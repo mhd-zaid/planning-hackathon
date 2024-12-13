@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { uuidv4 } from "uuidv7";
 import ModalWorkHour from "./ModalWorkHour";
 import ModalDeleteWorkHour from "./ModalDeleteWorkHour";
+import { RoleUser } from "@/utils/types/role-user.enum";
 
 export default function SchoolCalendar() {
   const {
@@ -20,6 +21,7 @@ export default function SchoolCalendar() {
     showCalendarWorkHour,
     workHourEvent,
     setWorkhourEvent,
+    displayedByRole,
   } = useCalendarContext();
 
   const { fillieres, schoolDays, workHours } = useDataContext();
@@ -233,57 +235,75 @@ export default function SchoolCalendar() {
     fillWorkHoursEvents();
   }, [workHours]);
 
-  return showCalendarWorkHour ? (
+  return (
     <>
-      <FullCalendar
-        key="workHour"
-        plugins={[dayGridPlugin, timeGridWeek, interactionPlugin]}
-        slotMinTime={"08:00:00"}
-        slotMaxTime={"18:00:00"}
-        slotDuration={"01:00:00"}
-        expandRows={true}
-        height={"890%"}
-        headerToolbar={headerToolbarProps}
-        locale={frLocale}
-        nowIndicator={true}
-        events={workHourEvent}
-        editable={true}
-        validRange={semesterRange || undefined}
-        selectable={!!semesterRange}
-        dateClick={dateClickWorkHour}
-        eventClick={deleteWorkHour}
-        // select={(info) => selectDateWorkHour(info)}
-        initialView="timeGridWeek"
-      />
+      {displayedByRole === RoleUser.manager && (
+        <FullCalendar
+          key="dayGrid"
+          plugins={[dayGridPlugin, timeGridWeek, interactionPlugin]}
+          headerToolbar={headerToolbarProps}
+          locale={frLocale}
+          nowIndicator={true}
+          height={"90%"}
+          events={events}
+          editable={true}
+          validRange={semesterRange || undefined}
+          selectable={!!semesterRange}
+          dateClick={dateClickSchoolDay}
+          eventClick={deleteSchoolDay}
+          select={selectDateSchoolDay}
+          initialView="dayGridMonth"
+        />
+      )}
 
-      <ModalWorkHour
-        showModal={showModal}
-        setShowModal={setShowModal}
-        eventWorkHour={eventWorkHour}
-      />
+      {displayedByRole === RoleUser.professor && (
+        <>
+          <FullCalendar
+            key="workHour"
+            plugins={[dayGridPlugin, timeGridWeek, interactionPlugin]}
+            slotMinTime={"08:00:00"}
+            slotMaxTime={"18:00:00"}
+            slotDuration={"01:00:00"}
+            expandRows={true}
+            height={"90%"}
+            headerToolbar={headerToolbarProps}
+            locale={frLocale}
+            nowIndicator={true}
+            events={workHourEvent}
+            editable={true}
+            validRange={semesterRange || undefined}
+            selectable={!!semesterRange}
+            dateClick={dateClickWorkHour}
+            eventClick={deleteWorkHour}
+            initialView="timeGridWeek"
+          />
 
-      <ModalDeleteWorkHour
-        showModalDelete={showModalDelete}
-        setShowModalDelete={setShowModalDelete}
-        idToDelete={idToDelete}
-      />
+          <ModalWorkHour
+            showModal={showModal}
+            setShowModal={setShowModal}
+            eventWorkHour={eventWorkHour}
+          />
+
+          <ModalDeleteWorkHour
+            showModalDelete={showModalDelete}
+            setShowModalDelete={setShowModalDelete}
+            idToDelete={idToDelete}
+          />
+        </>
+      )}
+
+      {displayedByRole === RoleUser.student && (
+        <FullCalendar
+          key="dayGrid"
+          plugins={[dayGridPlugin, timeGridWeek, interactionPlugin]}
+          headerToolbar={headerToolbarProps}
+          locale={frLocale}
+          nowIndicator={true}
+          height={"90%"}
+          events={events}
+          initialView="dayGridMonth"
+        />
+      )}
     </>
-  ) : (
-    <FullCalendar
-      key="dayGrid"
-      plugins={[dayGridPlugin, timeGridWeek, interactionPlugin]}
-      headerToolbar={headerToolbarProps}
-      locale={frLocale}
-      nowIndicator={true}
-      height={"89%"}
-      events={events}
-      editable={true}
-      validRange={semesterRange || undefined}
-      selectable={!!semesterRange}
-      dateClick={dateClickSchoolDay}
-      eventClick={deleteSchoolDay}
-      select={selectDateSchoolDay}
-      initialView="dayGridMonth"
-    />
   );
 }
