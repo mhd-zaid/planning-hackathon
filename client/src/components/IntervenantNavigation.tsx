@@ -1,16 +1,21 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { useDataContext } from "@/utils/context/data";
 import LogoutButton from "./Logout";
 import useRoleUser from "@/utils/hook/useRoleUser";
 import { Classes } from "@/utils/types/classes.interface";
 import { Event } from "@/utils/types/event.interface";
+import AvailableSlotsModal from "./AvailableSlotModal";
 
 export default function IntervenantNavigation() {
   const { classes, fetchSchoolDays } = useDataContext();
   const { selectedClassId, setSelectedClassId, events } = useCalendarContext();
+
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const closeModal = () => setIsModalOpen(false);
 
   const { role, user } = useRoleUser();
 
@@ -154,7 +159,7 @@ export default function IntervenantNavigation() {
       <div>
         <div className="flex items-center p-2 space-x-4">
           <img
-            src="https://source.unsplash.com/100x100/portrait"
+            src="https://images.unsplash.com/photo-1629054881775-ced62585d800?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt=""
             className="w-12 h-12 rounded-full dark:bg-gray-500"
           />
@@ -192,7 +197,7 @@ export default function IntervenantNavigation() {
                     <div className="font-bold">{classe.name}</div>
                     {classe.restHour && (
                       <p className="text-xs font-normal text-gray-500">
-                        Il reste {classe.restHour} heures à placé
+                        Il reste {classe.restHour} heures a placer
                       </p>
                     )}
                   </label>
@@ -207,6 +212,19 @@ export default function IntervenantNavigation() {
             >
               Enregistrer les jours
             </button>
+          </li>
+          <li>
+            <button
+              onClick={() => {setIsModalOpen(true)}}
+              className="w-full text-center text-white p-2 my-5 rounded-lg bg-first"
+            >
+              Suggestion des crénaux
+            </button>
+            <AvailableSlotsModal
+            onClose={closeModal}
+            isOpen={isModalOpen}
+            userId={user.id}
+            />
           </li>
         </ul>
       </div>

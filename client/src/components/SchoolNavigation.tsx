@@ -8,6 +8,7 @@ import useRoleUser from "@/utils/hook/useRoleUser";
 import { RoleUser } from "@/utils/types/role-user.enum";
 import { Backlog } from "@/utils/types/back-log.interface";
 import { Classes } from "@/utils/types/classes.interface";
+import ModalGeneratePlanning from "./ModalGeneratePlanning";
 
 export default function SchoolNavigation() {
   const { setSemesterRange } = useCalendarContext();
@@ -39,6 +40,8 @@ export default function SchoolNavigation() {
   const [backlogs, setBacklogs] = useState<Backlog[]>([]);
   const [selectedBacklog, setSelectedBacklog] = useState("");
   const [filteredClasses, setFilteredClasses] = useState<Classes[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   const periodFromFilliere = (selectedFilliereValue: string) => {
     const periods = fillieres
@@ -192,12 +195,20 @@ export default function SchoolNavigation() {
     return <p>Chargement...</p>;
   }
 
+  const handleWorkHoursValidated = () => {
+    getBacklog(selectedBacklog).then((data) => {
+      setBacklogs(data);
+    });
+    fetchStudentWorkHours(selectedBacklog);
+    console.log("Les heures de travail ont été validées.");
+  };
+
   return (
     <div className="h-screen p-3 space-y-2 w-72 dark:bg-gray-50 dark:text-gray-800 border-r border-second flex flex-col justify-between">
       <div>
         <div className="flex items-center p-2 space-x-4">
           <img
-            src="https://source.unsplash.com/100x100/portrait"
+            src="https://images.unsplash.com/photo-1733077151624-eabccd7ba381?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt=""
             className="w-12 h-12 rounded-full dark:bg-gray-500"
           />
@@ -328,6 +339,13 @@ export default function SchoolNavigation() {
           </ul>
         )}
 
+      <ModalGeneratePlanning 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        classId={selectedBacklog}
+        onWorkHoursValidated={handleWorkHoursValidated}
+      />
+
         {displayedByRole === RoleUser.professor && (
           <>
             <label className="block mt-6 mb-2 text-lg font-medium text-gray-900 text-center">
@@ -372,6 +390,13 @@ export default function SchoolNavigation() {
 
             {selectedBacklog && (
               <>
+              <a
+              rel="noopener noreferrer"
+              onClick={() => setIsModalOpen(true)}
+              className="mt-5 flex items-center p-2 space-x-3 rounded-md bg-second hover:bg-second cursor-pointer"
+                >
+                <span className="text-lg text-white">Générer un planning</span>
+                </a>
                 <h3 className="mt-4 font-bold">Récapitulatif des heures</h3>
                 {backlogs.map((backlog, index) => (
                   <div
