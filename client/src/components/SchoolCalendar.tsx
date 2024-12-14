@@ -171,6 +171,7 @@ export default function SchoolCalendar() {
   };
 
   const deleteWorkHour = async (e: EventClickArg) => {
+    if (e.event._def.publicId.startsWith("SCHOOL-DAY-")) return;
     setShowModalDelete(true);
     setIdToDelete(e.event._def.publicId);
   };
@@ -221,6 +222,7 @@ export default function SchoolCalendar() {
         title: "Professeur",
         start: workHour.beginDate,
         end: workHour.endDate,
+        allDay: false,
       };
 
       setWorkhourEvent((prev) => [...prev, event]);
@@ -229,7 +231,6 @@ export default function SchoolCalendar() {
 
   const fillStudentHours = () => {
     setStudentEvents([]);
-
     studentWorkHours.forEach((studentWorkHour) => {
       const event = {
         id: studentWorkHour.id,
@@ -242,8 +243,29 @@ export default function SchoolCalendar() {
     });
   };
 
+  const fillShcoolDaysOnWorkHour = () => {
+    const filteredWorkHoursEvent = workHourEvent.filter(
+      (event) => !event.id.startsWith("SCHOOL-DAY-")
+    );
+
+    setWorkhourEvent(filteredWorkHoursEvent);
+    schoolDays.forEach((schoolDay) => {
+      const event = {
+        id: `SCHOOL-DAY-${schoolDay.id}`,
+        title: schoolDay.class.name,
+        start: schoolDay.date,
+        end: undefined,
+        display: "background",
+        allDay: true,
+      };
+
+      setWorkhourEvent((prev) => [...prev, event]);
+    });
+  };
+
   useEffect(() => {
     fillEvents();
+    fillShcoolDaysOnWorkHour();
   }, [schoolDays]);
 
   useEffect(() => {
