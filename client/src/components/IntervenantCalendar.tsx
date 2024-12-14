@@ -40,6 +40,7 @@ export default function IntervenantCalendar() {
   };
 
   const fillAvailabilities = () => {
+    setEvents([])
     availabilities.forEach((availabilities) => {
       const event = {
         id: availabilities.id || "",

@@ -10,7 +10,8 @@ import { Event } from "@/utils/types/event.interface";
 import AvailableSlotsModal from "./AvailableSlotModal";
 
 export default function IntervenantNavigation() {
-  const { classes, fetchSchoolDays } = useDataContext();
+  const { classes, fetchSchoolDays, fetchAvailabilities } = useDataContext();
+
   const { selectedClassId, setSelectedClassId, events } = useCalendarContext();
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -138,6 +139,12 @@ export default function IntervenantNavigation() {
   useEffect(() => {
     if (!!selectedClassId) {
       fetchSchoolDays(selectedClassId);
+    }
+  }, [selectedClassId]);
+
+  useEffect(() => {
+    if (!!selectedClassId) {
+      fetchAvailabilities(user.id);
     }
   }, [selectedClassId]);
 
