@@ -15,8 +15,6 @@ export default function ModalUnvalabilities({
   teacher,
   unavailabilities,
 }: ModalUnvalabilitiesProps) {
-  console.log("ModalUnvalabilities -> unavailabilities", unavailabilities);
-  console.log("ModalUnvalabilities -> teacher", teacher);
   if (!unavailabilities.length || !teacher) return null;
 
   return (

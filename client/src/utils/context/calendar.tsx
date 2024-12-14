@@ -22,6 +22,10 @@ interface CalendarContextType {
   setDisplayedByRole: React.Dispatch<React.SetStateAction<RoleUser>>;
   studentEvents: Event[];
   setStudentEvents: React.Dispatch<React.SetStateAction<Event[]>>;
+  displayedCalendarIntervenant: "planning" | "dispo";
+  setDisplayedCalendarIntervenant: React.Dispatch<
+    React.SetStateAction<"planning" | "dispo">
+  >;
 }
 
 const CalendarContext = createContext<CalendarContextType>({
@@ -43,6 +47,8 @@ const CalendarContext = createContext<CalendarContextType>({
   setDisplayedByRole: () => {},
   studentEvents: [],
   setStudentEvents: () => {},
+  displayedCalendarIntervenant: "planning",
+  setDisplayedCalendarIntervenant: () => {},
 });
 
 export const CalendarProvider = ({
@@ -66,6 +72,9 @@ export const CalendarProvider = ({
   const [showCalendarWorkHour, setShowCalendarWorkHour] = useState(false);
   const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
 
+  const [displayedCalendarIntervenant, setDisplayedCalendarIntervenant] =
+    useState<"planning" | "dispo">("planning");
+
   const value = {
     semesterRange,
     setSemesterRange,
@@ -85,6 +94,8 @@ export const CalendarProvider = ({
     setDisplayedByRole,
     studentEvents,
     setStudentEvents,
+    displayedCalendarIntervenant,
+    setDisplayedCalendarIntervenant,
   };
 
   return (

@@ -8,77 +8,25 @@ import useRoleUser from "@/utils/hook/useRoleUser";
 import { Classes } from "@/utils/types/classes.interface";
 import { Event } from "@/utils/types/event.interface";
 import AvailableSlotsModal from "./AvailableSlotModal";
+import { User } from "@/utils/types/user.interface";
+import { toast } from "react-toastify";
 
 export default function IntervenantNavigation() {
   const { classes, fetchSchoolDays, fetchAvailabilities } = useDataContext();
 
-  const { selectedClassId, setSelectedClassId, events } = useCalendarContext();
+  const {
+    selectedClassId,
+    setSelectedClassId,
+    events,
+    displayedCalendarIntervenant,
+    setDisplayedCalendarIntervenant,
+  } = useCalendarContext();
+
+  const { role, user } = useRoleUser();
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const closeModal = () => setIsModalOpen(false);
-
-  const { role, user } = useRoleUser();
-
-  const getDatesBetween = (startDate: string, endDate: string) => {
-    const dates = [];
-    const currentDate = new Date(startDate);
-    const end = new Date(endDate);
-
-    while (currentDate < end) {
-      dates.push(new Date(currentDate));
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    return dates;
-  };
-
-  const formatEventsToDayDate = (events: Event[], formNew?: boolean) => {
-    const dates: { date: string }[] = events.flatMap((event) => {
-      if (formNew && !event.id.startsWith("NEW-")) {
-        return [];
-      }
-
-      if (!event.end) {
-        return [
-          {
-            date: event.start,
-          },
-        ];
-      } else {
-        const dates = getDatesBetween(event.start, event.end);
-        return dates.map((date) => ({
-          date: date.toISOString().split("T")[0],
-        }));
-      }
-    });
-
-    return dates;
-  };
-
-  const calculRestHour = (classe: Classes | undefined) => {
-    if (!classe) return 0;
-
-    const restHourByClasse = classe.subjectClasses.reduce((acc, current) => {
-      return (
-        acc + current.subject.nbHoursQuota + current.subject.nbHoursQuotaExam
-      );
-    }, 0);
-
-    return restHourByClasse;
-  };
-
-  const calculHourAlreadyPlaced = (classe: Classes, events: Event[]) => {
-    if (!events || !events.length) return 0;
-
-    const baseHour = calculRestHour(classe);
-
-    const HOUR_BY_DAY = 8;
-    const dayAlreadyPlaced = formatEventsToDayDate(events).length;
-
-    return baseHour - dayAlreadyPlaced * HOUR_BY_DAY;
-  };
-
   const formatAvaibilities = (newEvent: Event[]) => {
     const formatedEvent = newEvent.flatMap((event) => [
       {
@@ -105,12 +53,17 @@ export default function IntervenantNavigation() {
         }
       })
       .filter((event) => event) as Event[];
-    if (!newEvent) return;
+
+    if (!newEvent || !newEvent.length) {
+      toast.error("Aucune disponibilité à enregistrer");
+      return;
+    }
+
     const body = formatAvaibilities(newEvent);
 
     try {
       await fetch(
-        `${process.env.NEXT_PUBLIC_URL_API}/availabilities/${user.id}`,
+        `${process.env.NEXT_PUBLIC_URL_API}/availabilities/${user?.id}`,
         {
           method: "POST",
           headers: {
@@ -119,7 +72,9 @@ export default function IntervenantNavigation() {
           body: JSON.stringify(body),
         }
       );
+      toast.success("Disponibilités enregistrées");
     } catch (error) {
+      toast.error("Erreur lors de la sauvegarde des disponibilités");
       console.log("error", error);
     }
   };
@@ -127,7 +82,7 @@ export default function IntervenantNavigation() {
   const teacherClasses = classes
     .flatMap((classe) =>
       classe.subjectClasses.map((subjectClasse) => {
-        if (subjectClasse.teacher.id === user.id) {
+        if (subjectClasse.teacher.id === user?.id) {
           return classe;
         } else {
           return null;
@@ -143,15 +98,13 @@ export default function IntervenantNavigation() {
   }, [selectedClassId]);
 
   useEffect(() => {
-    if (!!selectedClassId) {
-      fetchAvailabilities(user.id);
-    }
-  }, [selectedClassId]);
+    if (!user) return;
+    fetchAvailabilities(user?.id);
+  }, [user]);
 
   useEffect(() => {
-    if (!!selectedClassId) {
-      return;
-    }
+    if (selectedClassId) return;
+
     if (teacherClasses && teacherClasses.length > 0) {
       setSelectedClassId(teacherClasses[0].id);
     }
@@ -172,77 +125,92 @@ export default function IntervenantNavigation() {
           />
           <div>
             <h2 className="text-lg font-semibold">
-              {user.firstname} {user.lastname}
+              {user?.firstname} {user?.lastname}
             </h2>
           </div>
         </div>
-        <ul>
-          <br />
-          <p className="text-lg">Mes classes : </p>
-          {teacherClasses?.map((classe: Classes) => (
-            <li key={classe.id}>
-              <div className="flex p-2 rounded hover:bg-gray-100 my-4">
-                <div className="flex items-center h-5">
-                  <input
-                    id={`input-index-${classe.name}`}
-                    type="radio"
-                    name="classe-radio"
-                    value={classe.id}
-                    checked={selectedClassId === classe.id}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
-                    onChange={(e) => {
-                      classe.restHour = calculHourAlreadyPlaced(classe, events);
-                      setSelectedClassId(e.target.value);
-                    }}
-                  />
+
+        <label className="block mt-6 mb-2 text-lg font-medium text-gray-900 text-center">
+          Que voulez vous faire ?
+        </label>
+        <select
+          id="classe"
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+          onChange={(e) =>
+            setDisplayedCalendarIntervenant(
+              e.target.value as "planning" | "dispo"
+            )
+          }
+        >
+          <option key={"planning"} value={"planning"}>
+            Consulter mes planning
+          </option>
+          <option key={"dispo"} value={"dispo"}>
+            Ajouter des disponibilité
+          </option>
+        </select>
+
+        {displayedCalendarIntervenant === "dispo" && (
+          <ul>
+            <br />
+            <p className="text-lg">Mes classes : </p>
+            {teacherClasses?.map((classe: Classes) => (
+              <li key={classe.id}>
+                <div className="flex p-2 rounded hover:bg-gray-100 my-4">
+                  <div className="flex items-center h-5">
+                    <input
+                      id={`input-index-${classe.name}`}
+                      type="radio"
+                      name="classe-radio"
+                      value={classe.id}
+                      checked={selectedClassId === classe.id}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                      onChange={(e) => {
+                        setSelectedClassId(e.target.value);
+                      }}
+                    />
+                  </div>
+                  <div className="ms-2 text-sm">
+                    <label
+                      htmlFor={`input-index-${classe.name}`}
+                      className="font-medium text-gray-900"
+                    >
+                      <div className="font-bold">{classe.name}</div>
+                    </label>
+                  </div>
                 </div>
-                <div className="ms-2 text-sm">
-                  <label
-                    htmlFor={`input-index-${classe.name}`}
-                    className="font-medium text-gray-900"
-                  >
-                    <div className="font-bold">{classe.name}</div>
-                    {classe.restHour && (
-                      <p className="text-xs font-normal text-gray-500">
-                        Il reste {classe.restHour} heures a placer
-                      </p>
-                    )}
-                  </label>
-                </div>
-              </div>
+              </li>
+            ))}
+            <li>
+              <button
+                onClick={() => postAvaibilities(events)}
+                className="w-full text-center p-2 my-5 rounded-lg bg-first"
+              >
+                Enregistrer les jours
+              </button>
             </li>
-          ))}
-          <li>
-            <button
-              onClick={() => postAvaibilities(events)}
-              className="w-full text-center p-2 my-5 rounded-lg bg-first"
-            >
-              Enregistrer les jours
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => {setIsModalOpen(true)}}
-              className="w-full text-center text-white p-2 my-5 rounded-lg bg-first"
-            >
-              Suggestion des crénaux
-            </button>
-            <AvailableSlotsModal
-            onClose={closeModal}
-            isOpen={isModalOpen}
-            userId={user.id}
-            />
-          </li>
-        </ul>
+            <li>
+              <AvailableSlotsModal
+                onClose={closeModal}
+                isOpen={isModalOpen}
+                userId={(user as User).id}
+              />
+            </li>
+          </ul>
+        )}
       </div>
 
       <div>
         <div>
-          <ul className="pt-4 pb-2 space-y-1 text-sm">
-            <li>
-              <LogoutButton />
-            </li>
-          </ul>
+          <button
+            onClick={() => {
+              setIsModalOpen(true);
+            }}
+            className="w-full text-center text-white p-2 my-5 rounded-lg bg-first"
+          >
+            Suggestion des crénaux
+          </button>
+          <LogoutButton />
         </div>
       </div>
     </div>
