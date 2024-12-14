@@ -252,7 +252,7 @@ export default function SchoolCalendar() {
     schoolDays.forEach((schoolDay) => {
       const event = {
         id: `SCHOOL-DAY-${schoolDay.id}`,
-        title: schoolDay.class.name,
+        title: "",
         start: schoolDay.date,
         end: undefined,
         display: "background",

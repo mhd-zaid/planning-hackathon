@@ -39,6 +39,8 @@ export default function ModalWorkHour({
     setSelectedClasse(null);
     setSelectedTeacher(null);
     setSelectedSubjectClasseId("");
+    setFilteredSubjectByTeacher([]);
+    setFilteredClassesByTeacher([]);
   };
 
   const formatEndDante = (dateWorkHour: string) => {
@@ -99,11 +101,11 @@ export default function ModalWorkHour({
             end: formatEndDante(eventWorkHour.dateStr),
           },
         ]);
-
-        onClose();
       }
+      onClose();
     } catch (error) {
       console.log(error);
+      onClose();
     }
   };
 
@@ -131,7 +133,7 @@ export default function ModalWorkHour({
     setSelectedTeacher(teacher || null);
 
     setFilteredClassesByTeacher(classesByTeacher);
-  }, [selectedTeacherId]);
+  }, [selectedTeacherId, showModal]);
 
   useEffect(() => {
     if (!selectedClasse || !selectedTeacher) return;
