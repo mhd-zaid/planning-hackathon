@@ -47,6 +47,7 @@ export default function IntervenantCalendar() {
   };
 
   const fillAvailabilities = () => {
+    setEvents([])
     availabilities.forEach((availabilities) => {
       const event = {
         id: availabilities.id || '',
@@ -60,12 +61,13 @@ export default function IntervenantCalendar() {
 
   useEffect(() => {
     fillEvents();
+    fillAvailabilities();
     }, [schoolDays]);
 
-  useEffect(() => {
-    fillAvailabilities();
-    console.log(availabilities)
-  }, [availabilities]);
+  // useEffect(() => {
+  //   fillAvailabilities();
+  //   console.log(availabilities)
+  // }, [availabilities]);
 
   useEffect(() => {
     fetchSchoolDays(selectedClassId)

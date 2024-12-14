@@ -242,7 +242,7 @@ export default function SchoolCalendar() {
         slotMaxTime={"18:00:00"}
         slotDuration={"01:00:00"}
         expandRows={true}
-        height={"890%"}
+        height={"89%"}
         headerToolbar={headerToolbarProps}
         locale={frLocale}
         nowIndicator={true}

@@ -11,7 +11,7 @@ import { Event } from "@/utils/types/event.interface";
 import { avaibilities } from "@/utils/types/avaibilities.interface";
 
 export default function IntervenantNavigation() {
-  const { classes, fetchSchoolDays } = useDataContext();
+  const { classes, fetchSchoolDays, fetchAvailabilities } = useDataContext();
   // const [user, setUser] = useState();
   const { selectedClassId, setSelectedClassId, events } = useCalendarContext();
 
@@ -132,6 +132,12 @@ export default function IntervenantNavigation() {
   useEffect(() => {
     if (!!selectedClassId) {
       fetchSchoolDays(selectedClassId);
+    }
+  }, [selectedClassId]);
+
+  useEffect(() => {
+    if (!!selectedClassId) {
+      fetchAvailabilities(user.id);
     }
   }, [selectedClassId]);
 
