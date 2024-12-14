@@ -44,6 +44,7 @@ export default function IntervenantNavigation() {
   };
 
   const postAvaibilities = async (events: Event[]) => {
+    if(!user) return
     const newEvent = events
       .map((event) => {
         if (event.id.startsWith("new-")) {
@@ -76,7 +77,7 @@ export default function IntervenantNavigation() {
     } catch (error) {
       toast.error("Erreur lors de la sauvegarde des disponibilités");
       console.log("error", error);
-    }
+    }finally{fetchAvailabilities(user.id)}
   };
 
   const teacherClasses = classes
@@ -91,11 +92,11 @@ export default function IntervenantNavigation() {
     )
     .filter((teacher) => teacher) as Classes[];
 
-  // useEffect(() => {
-  //   if (!!selectedClassId) {
-  //     fetchSchoolDays(selectedClassId);
-  //   }
-  // }, [selectedClassId]);
+  useEffect(() => {
+    if (!!selectedClassId) {
+      fetchSchoolDays(selectedClassId);
+    }
+  }, [selectedClassId]);
 
   useEffect(() => {
     if (!user) return;
@@ -115,7 +116,7 @@ export default function IntervenantNavigation() {
   }
 
   return (
-    <div className="h-screen p-3 space-y-2 w-72 dark:bg-gray-50 dark:text-gray-800 border-r border-second flex flex-col justify-between">
+    <div className="h-screen p-3 shadow-lg shadow-first space-y-2 w-72 dark:bg-gray-50 dark:text-gray-800 border-r border-second flex flex-col justify-between">
       <div>
         <div className="flex items-center p-2 space-x-4">
           <img
@@ -135,7 +136,7 @@ export default function IntervenantNavigation() {
         </label>
         <select
           id="classe"
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+          className="bg-gray-50 border border-first text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
           onChange={(e) =>
             setDisplayedCalendarIntervenant(
               e.target.value as "planning" | "dispo"
@@ -143,7 +144,7 @@ export default function IntervenantNavigation() {
           }
         >
           <option key={"planning"} value={"planning"}>
-            Consulter mes planning
+            Consulter mon planning
           </option>
           <option key={"dispo"} value={"dispo"}>
             Ajouter des disponibilité
@@ -182,14 +183,6 @@ export default function IntervenantNavigation() {
               </li>
             ))}
             <li>
-              <button
-                onClick={() => postAvaibilities(events)}
-                className="w-full text-center p-2 my-5 rounded-lg bg-first"
-              >
-                Enregistrer les jours
-              </button>
-            </li>
-            <li>
             <button
               onClick={() => postAvaibilities(events)}
               className=" text-white text-lg w-full text-center p-2 my-5 rounded-lg bg-first"
@@ -211,7 +204,7 @@ export default function IntervenantNavigation() {
             onClick={() => {
               setIsModalOpen(true);
             }}
-            className=" text-white text-lg w-full text-center text-white p-2 my-5 rounded-lg bg-first"
+            className=" text-white text-lg w-full text-center p-2 my-5 rounded-lg bg-first"
           >
             Suggestion des crénaux
           </button>

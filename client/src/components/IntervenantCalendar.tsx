@@ -48,7 +48,7 @@ export default function IntervenantCalendar() {
     schoolDays.forEach((schoolDay) => {
       const event = {
         id: schoolDay.id,
-        title: schoolDay.class.name,
+        title: "",
         start: schoolDay.date,
         end: undefined,
         display: "background",
