@@ -7,7 +7,6 @@ import { useDataContext } from "@/utils/context/data";
 import { useCalendarContext } from "@/utils/context/calendar";
 import { useEffect } from "react";
 import useRoleUser from "@/utils/hook/useRoleUser";
-import { User } from "@/utils/types/user.interface";
 
 export default function StudentCalendar() {
   const headerToolbarProps = {
@@ -42,8 +41,9 @@ export default function StudentCalendar() {
   }, [studentWorkHours]);
 
   useEffect(() => {
-    fetchStudentWorkHours((user as User).classId);
-  }, []);
+    if (!user) return;
+    fetchStudentWorkHours(user.classId);
+  }, [user]);
 
   return (
     <FullCalendar

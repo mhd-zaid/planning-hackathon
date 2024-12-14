@@ -60,8 +60,12 @@ export default function IntervenantCalendar() {
   }, [availabilities]);
 
   useEffect(() => {
-    fetchSchoolDays(selectedClassId);
+    if (!user) return;
     fetchAvailabilities(user.id);
+  }, [user]);
+
+  useEffect(() => {
+    fetchSchoolDays(selectedClassId);
   }, []);
 
   return (
