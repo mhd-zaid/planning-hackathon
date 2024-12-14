@@ -236,7 +236,7 @@ export default function SchoolNavigation() {
   }
 
   return (
-    <div className="h-screen p-3 space-y-2 w-72 dark:bg-gray-50 dark:text-gray-800 border-r border-second flex flex-col justify-between">
+    <div className="h-screen p-3 shadow-lg shadow-first space-y-2 w-72 dark:bg-gray-50 dark:text-gray-800 border-r border-second flex flex-col justify-between">
       <div>
         <div className="flex items-center p-2 space-x-4">
           <Image
@@ -259,7 +259,7 @@ export default function SchoolNavigation() {
           Accéder au calendrier :
         </label>
         <select
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+          className="bg-gray-50 border border-first text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
           onChange={(e) => setDisplayedByRole(e.target.value as RoleUser)}
         >
           <option key={RoleUser.manager} value={RoleUser.manager}>
@@ -286,7 +286,7 @@ export default function SchoolNavigation() {
               </label>
               <select
                 id="filliere"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                className="bg-gray-50 border border-first text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                 onChange={(e) => setSelectedFilliere(e.target.value)}
               >
                 <option value={""}>Choisir une fillière</option>
@@ -301,7 +301,7 @@ export default function SchoolNavigation() {
                 <form onSubmit={submitForm}>
                   <p className="block mt-6 text-lg font-medium text-gray-900 text-center">
                     Choisir une classe
-                  </p>
+                  </p> <br />
                   <ul>
                     {filteredClasses?.map((classe) => (
                       <li key={classe.id}>
@@ -313,7 +313,7 @@ export default function SchoolNavigation() {
                               name="classe-radio"
                               value={classe.id}
                               checked={classe.id === selectedClassId}
-                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
+                              className="w-4 h-4 text-blue-600 bg-gray-100 border-first focus:ring-blue-500"
                               onChange={(e) => {
                                 setSelectedClassId(e.target.value);
                                 fetchSchoolDays(e.target.value);
@@ -341,7 +341,7 @@ export default function SchoolNavigation() {
                   </label>
                   <select
                     id="period"
-                    className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                    className="bg-gray-50 border border-first text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                     onChange={onChangeSemester}
                   >
                     <option value="">Choisir une période</option>
@@ -356,7 +356,7 @@ export default function SchoolNavigation() {
 
                   <button
                     type="submit"
-                    className="w-full text-center p-2 my-5 rounded-lg bg-first"
+                    className=" text-white text-lg w-full text-center p-2 my-5 rounded-lg bg-first"
                   >
                     Enregistrer les jours
                   </button>
@@ -380,7 +380,7 @@ export default function SchoolNavigation() {
             </label>
             <select
               id="period"
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+              className="bg-gray-50 border border-first text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               onChange={(e) => {
                 fetchWorkHours(e.target.value);
                 setSelectedTeacherId(e.target.value);
@@ -399,7 +399,7 @@ export default function SchoolNavigation() {
               Jour d&apos;école par classe
             </label>
             <select
-              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+              className="bg-gray-50 border border-first text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               onChange={(e) => fetchSchoolDays(e.target.value)}
             >
               <option value={""}>Choisir une classe</option>
@@ -429,7 +429,7 @@ export default function SchoolNavigation() {
               </label>
               <select
                 id="classe"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                className="bg-gray-50 border border-first text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                 onChange={(e) => {
                   setSelectedBacklog(e.target.value);
                   fetchStudentWorkHours(e.target.value);
@@ -449,7 +449,7 @@ export default function SchoolNavigation() {
                 <a
                   rel="noopener noreferrer"
                   onClick={() => setIsModalOpen(true)}
-                  className="mt-5 flex items-center p-2 space-x-3 rounded-md bg-second hover:bg-second cursor-pointer"
+                  className="mt-5 flex items-center p-2 space-x-3 rounded-md bg-first hover:bg-second cursor-pointer"
                 >
                   <span className="text-lg text-white">
                     Générer un planning

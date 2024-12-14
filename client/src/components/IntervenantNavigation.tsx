@@ -136,11 +136,11 @@ export default function IntervenantNavigation() {
     )
     .filter((teacher) => teacher) as Classes[];
 
-  useEffect(() => {
-    if (!!selectedClassId) {
-      fetchSchoolDays(selectedClassId);
-    }
-  }, [selectedClassId]);
+  // useEffect(() => {
+  //   if (!!selectedClassId) {
+  //     fetchSchoolDays(selectedClassId);
+  //   }
+  // }, [selectedClassId]);
 
   useEffect(() => {
     if (!!selectedClassId) {
@@ -215,7 +215,7 @@ export default function IntervenantNavigation() {
           <li>
             <button
               onClick={() => postAvaibilities(events)}
-              className="w-full text-center p-2 my-5 rounded-lg bg-first"
+              className=" text-white text-lg w-full text-center p-2 my-5 rounded-lg bg-first"
             >
               Enregistrer les jours
             </button>
@@ -223,7 +223,7 @@ export default function IntervenantNavigation() {
           <li>
             <button
               onClick={() => {setIsModalOpen(true)}}
-              className="w-full text-center text-white p-2 my-5 rounded-lg bg-first"
+              className=" text-lg w-full text-center text-white p-2 my-5 rounded-lg bg-first"
             >
               Suggestion des crénaux
             </button>
