@@ -12,6 +12,7 @@ import ModalGeneratePlanning from "./ModalGeneratePlanning";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import ModalUnvalabilities from "./ModalUnvalabilities";
+import { ClipLoader } from "react-spinners";
 
 export default function SchoolNavigation() {
   const { setSemesterRange } = useCalendarContext();
@@ -45,6 +46,8 @@ export default function SchoolNavigation() {
   const [filteredClasses, setFilteredClasses] = useState<Classes[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showModalUnavailability, setShowModalUnavailability] = useState(false);
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const [filteredClassesByTeacher, setFilteredClassesByTeacher] = useState<
     Classes[]
@@ -126,6 +129,7 @@ export default function SchoolNavigation() {
 
   const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setIsLoading(true);
 
     if (!selectedClassId) {
       toast.error("Veuillez choisir une classe");
@@ -139,6 +143,7 @@ export default function SchoolNavigation() {
     const formattedEvents = formatEventsToDayDate(events, true);
     if (!formattedEvents.length) {
       toast.error("Aucunne nouvelle date à enregistrer.");
+      setIsLoading(false);
       return;
     }
 
@@ -163,6 +168,7 @@ export default function SchoolNavigation() {
       console.log("error", error);
     } finally {
       fetchSchoolDays(selectedClassId);
+      setIsLoading(false);
     }
   };
 
@@ -301,7 +307,8 @@ export default function SchoolNavigation() {
                 <form onSubmit={submitForm}>
                   <p className="block mt-6 text-lg font-medium text-gray-900 text-center">
                     Choisir une classe
-                  </p> <br />
+                  </p>{" "}
+                  <br />
                   <ul>
                     {filteredClasses?.map((classe) => (
                       <li key={classe.id}>
@@ -332,7 +339,6 @@ export default function SchoolNavigation() {
                       </li>
                     ))}
                   </ul>
-
                   <label
                     htmlFor="period"
                     className="block mt-6 mb-2 text-lg font-medium text-gray-900 text-center"
@@ -353,12 +359,15 @@ export default function SchoolNavigation() {
                       </option>
                     ))}
                   </select>
-
                   <button
                     type="submit"
                     className=" text-white text-lg w-full text-center p-2 my-5 rounded-lg bg-first"
                   >
-                    Enregistrer les jours
+                    {isLoading ? (
+                      <ClipLoader size={20} color="#fff" />
+                    ) : (
+                      "Enregistrer les jours"
+                    )}
                   </button>
                 </form>
               )}

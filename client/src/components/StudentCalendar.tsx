@@ -27,7 +27,7 @@ export default function StudentCalendar() {
     studentWorkHours.forEach((studentWorkHour) => {
       const event = {
         id: studentWorkHour.id,
-        title: "Cours de ??",
+        title: studentWorkHour.subjectClass.subject.name,
         start: studentWorkHour.beginDate,
         end: studentWorkHour.endDate,
       };

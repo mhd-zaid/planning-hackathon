@@ -75,7 +75,7 @@ export default function IntervenantCalendar() {
     workHours.forEach((workHour) => {
       const event = {
         id: workHour.id,
-        title: "Cours de ??",
+        title: workHour.subjectClass.subject.name,
         start: workHour.beginDate,
         end: workHour.endDate,
       };
@@ -131,6 +131,7 @@ export default function IntervenantCalendar() {
 
       toast.success("Disponibilité supprimée avec succès");
     } catch (error) {
+      console.error(error);
       toast.error("Erreur lors de la suppression de la disponibilité");
     } finally {
       fetchAvailabilities(user.id);

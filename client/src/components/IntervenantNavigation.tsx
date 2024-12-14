@@ -10,6 +10,7 @@ import { Event } from "@/utils/types/event.interface";
 import AvailableSlotsModal from "./AvailableSlotModal";
 import { User } from "@/utils/types/user.interface";
 import { toast } from "react-toastify";
+import { ClipLoader } from "react-spinners";
 
 export default function IntervenantNavigation() {
   const { classes, fetchSchoolDays, fetchAvailabilities } = useDataContext();
@@ -25,8 +26,10 @@ export default function IntervenantNavigation() {
   const { role, user } = useRoleUser();
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const closeModal = () => setIsModalOpen(false);
+
   const formatAvaibilities = (newEvent: Event[]) => {
     const formatedEvent = newEvent.flatMap((event) => [
       {
@@ -44,7 +47,9 @@ export default function IntervenantNavigation() {
   };
 
   const postAvaibilities = async (events: Event[]) => {
-    if(!user) return
+    setIsLoading(true);
+    if (!user) return;
+
     const newEvent = events
       .map((event) => {
         if (event.id.startsWith("new-")) {
@@ -57,6 +62,7 @@ export default function IntervenantNavigation() {
 
     if (!newEvent || !newEvent.length) {
       toast.error("Aucune disponibilité à enregistrer");
+      setIsLoading(false);
       return;
     }
 
@@ -77,7 +83,10 @@ export default function IntervenantNavigation() {
     } catch (error) {
       toast.error("Erreur lors de la sauvegarde des disponibilités");
       console.log("error", error);
-    }finally{fetchAvailabilities(user.id)}
+    } finally {
+      fetchAvailabilities(user?.id);
+      setIsLoading(false);
+    }
   };
 
   const teacherClasses = classes
@@ -116,7 +125,7 @@ export default function IntervenantNavigation() {
   }
 
   return (
-    <div className="h-screen p-3 shadow-lg shadow-first space-y-2 w-72 dark:bg-gray-50 dark:text-gray-800 border-r border-second flex flex-col justify-between">
+    <div className="h-screen p-3 space-y-2 w-72 dark:bg-gray-50 dark:text-gray-800 border-r border-second flex flex-col justify-between">
       <div>
         <div className="flex items-center p-2 space-x-4">
           <img
@@ -136,7 +145,7 @@ export default function IntervenantNavigation() {
         </label>
         <select
           id="classe"
-          className="bg-gray-50 border border-first text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
           onChange={(e) =>
             setDisplayedCalendarIntervenant(
               e.target.value as "planning" | "dispo"
@@ -144,7 +153,7 @@ export default function IntervenantNavigation() {
           }
         >
           <option key={"planning"} value={"planning"}>
-            Consulter mon planning
+            Consulter mes planning
           </option>
           <option key={"dispo"} value={"dispo"}>
             Ajouter des disponibilité
@@ -183,28 +192,35 @@ export default function IntervenantNavigation() {
               </li>
             ))}
             <li>
-            <button
-              onClick={() => postAvaibilities(events)}
-              className=" text-white text-lg w-full text-center p-2 my-5 rounded-lg bg-first"
-            >
-              Enregistrer les jours
-            </button>
-          </li>
+              <button
+                onClick={() => postAvaibilities(events)}
+                className="w-full text-center p-2 my-5 text-white rounded-lg bg-first"
+              >
+                {isLoading ? (
+                  <ClipLoader size={20} color="#fff" />
+                ) : (
+                  "Enregistrer les jours"
+                )}
+              </button>
+            </li>
+            <li>
+              <AvailableSlotsModal
+                onClose={closeModal}
+                isOpen={isModalOpen}
+                userId={(user as User).id}
+              />
+            </li>
           </ul>
         )}
       </div>
+
       <div>
-        <AvailableSlotsModal
-          onClose={closeModal}
-          isOpen={isModalOpen}
-          userId={(user as User).id}
-        />
         <div>
           <button
             onClick={() => {
               setIsModalOpen(true);
             }}
-            className=" text-white text-lg w-full text-center p-2 my-5 rounded-lg bg-first"
+            className="w-full text-center text-white p-2 my-5 rounded-lg bg-first"
           >
             Suggestion des crénaux
           </button>
