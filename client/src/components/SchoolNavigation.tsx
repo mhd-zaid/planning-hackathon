@@ -9,6 +9,7 @@ import { RoleUser } from "@/utils/types/role-user.enum";
 import { Backlog } from "@/utils/types/back-log.interface";
 import { Classes } from "@/utils/types/classes.interface";
 import ModalGeneratePlanning from "./ModalGeneratePlanning";
+import Image from "next/image";
 
 export default function SchoolNavigation() {
   const { setSemesterRange } = useCalendarContext();
@@ -159,6 +160,14 @@ export default function SchoolNavigation() {
       ?.classes;
   };
 
+  const handleWorkHoursValidated = () => {
+    getBacklog(selectedBacklog).then((data) => {
+      setBacklogs(data);
+    });
+    fetchStudentWorkHours(selectedBacklog);
+    console.log("Les heures de travail ont été validées.");
+  };
+
   useEffect(() => {
     const classes = classesFromFilliere(selectedFilliere);
     if (classes && classes.length > 0) {
@@ -178,10 +187,11 @@ export default function SchoolNavigation() {
   }, [selectedBacklog]);
 
   useEffect(() => {
-    if (classes && classes.length > 0) {
-      setSelectedClassId(classes[0].id);
-    }
-  }, [selectedFilliere]);
+    if (!filteredClasses || !filteredClasses.length) return;
+
+    setSelectedClassId(filteredClasses[0].id);
+    fetchSchoolDays(filteredClasses[0].id);
+  }, [filteredClasses]);
 
   useEffect(() => {
     if (selectedTeacherId || !teachers[0]?.id) return;
@@ -194,26 +204,20 @@ export default function SchoolNavigation() {
     return <p>Chargement...</p>;
   }
 
-  const handleWorkHoursValidated = () => {
-    getBacklog(selectedBacklog).then((data) => {
-      setBacklogs(data);
-    });
-    fetchStudentWorkHours(selectedBacklog);
-    console.log("Les heures de travail ont été validées.");
-  };
-
   return (
     <div className="h-screen p-3 space-y-2 w-72 dark:bg-gray-50 dark:text-gray-800 border-r border-second flex flex-col justify-between">
       <div>
         <div className="flex items-center p-2 space-x-4">
-          <img
+          <Image
+            width="50"
+            height="50"
             src="https://images.unsplash.com/photo-1733077151624-eabccd7ba381?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt=""
             className="w-12 h-12 rounded-full dark:bg-gray-500"
           />
           <div>
             <h2 className="text-lg font-semibold">
-              {user.firstname} {user.lastname}
+              {user?.firstname} {user?.lastname}
             </h2>
           </div>
         </div>
@@ -252,9 +256,7 @@ export default function SchoolNavigation() {
               <select
                 id="filliere"
                 className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                onChange={(e) => {
-                  setSelectedFilliere(e.target.value);
-                }}
+                onChange={(e) => setSelectedFilliere(e.target.value)}
               >
                 <option value={""}>Choisir une fillière</option>
                 {fillieres.map((filliere) => (
@@ -279,11 +281,11 @@ export default function SchoolNavigation() {
                               type="radio"
                               name="classe-radio"
                               value={classe.id}
-                              checked={selectedClassId === classe.id}
+                              checked={classe.id === selectedClassId}
                               className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
                               onChange={(e) => {
-                                fetchSchoolDays(selectedClassId);
                                 setSelectedClassId(e.target.value);
+                                fetchSchoolDays(e.target.value);
                               }}
                             />
                           </div>
@@ -293,11 +295,6 @@ export default function SchoolNavigation() {
                               className="font-medium text-gray-900"
                             >
                               <div className="font-bold">{classe.name}</div>
-                              {classe.restHour && (
-                                <p className="text-xs font-normal text-gray-500">
-                                  Il reste {classe.restHour} heures à placer
-                                </p>
-                              )}
                             </label>
                           </div>
                         </div>
