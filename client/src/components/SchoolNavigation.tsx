@@ -133,7 +133,6 @@ export default function SchoolNavigation() {
     }
 
     const formattedEvents = formatEventsToDayDate(events, true);
-    console.log("formattedEvents", formattedEvents);
     if (!formattedEvents.length) {
       toast.error("Aucunne nouvelle date à enregistrer.");
       return;
@@ -180,7 +179,6 @@ export default function SchoolNavigation() {
       setBacklogs(data);
     });
     fetchStudentWorkHours(selectedBacklog);
-    console.log("Les heures de travail ont été validées.");
   };
 
   const updateFilterClasses = (teacherId: string) => {
