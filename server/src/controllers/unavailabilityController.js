@@ -6,6 +6,18 @@ const getAll = async (req, res) => {
       where: {
         userId: req.params.userId,
       },
+      include: [
+        {
+          model: db.SubjectClass,
+          as: "subjectClass",
+          include: [
+            {
+              model: db.Subject,
+              as: "subject",
+            },
+          ],
+        },
+      ],
     });
 
     const userExist = await db.User.findOne({

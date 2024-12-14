@@ -11,6 +11,7 @@ import { Classes } from "@/utils/types/classes.interface";
 import ModalGeneratePlanning from "./ModalGeneratePlanning";
 import Image from "next/image";
 import { toast } from "react-toastify";
+import ModalUnvalabilities from "./ModalUnvalabilities";
 
 export default function SchoolNavigation() {
   const { setSemesterRange } = useCalendarContext();
@@ -18,9 +19,11 @@ export default function SchoolNavigation() {
     fillieres,
     classes,
     teachers,
+    unavailabilities,
     fetchSchoolDays,
     fetchWorkHours,
     fetchStudentWorkHours,
+    fetchUnAvailabilities,
   } = useDataContext();
 
   const {
@@ -41,6 +44,7 @@ export default function SchoolNavigation() {
   const [selectedBacklog, setSelectedBacklog] = useState("");
   const [filteredClasses, setFilteredClasses] = useState<Classes[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showModalUnavailability, setShowModalUnavailability] = useState(false);
 
   const [filteredClassesByTeacher, setFilteredClassesByTeacher] = useState<
     Classes[]
@@ -224,6 +228,7 @@ export default function SchoolNavigation() {
     setSelectedTeacherId(teachers[0].id);
     fetchWorkHours(teachers[0].id);
     updateFilterClasses(teachers[0].id);
+    fetchUnAvailabilities(teachers[0].id);
   }, [teachers]);
 
   if (!role) {
@@ -380,6 +385,7 @@ export default function SchoolNavigation() {
                 fetchWorkHours(e.target.value);
                 setSelectedTeacherId(e.target.value);
                 updateFilterClasses(e.target.value);
+                fetchUnAvailabilities(e.target.value);
               }}
             >
               {teachers?.map((teacher) => (
@@ -403,6 +409,15 @@ export default function SchoolNavigation() {
                 </option>
               ))}
             </select>
+
+            <ModalUnvalabilities
+              showModal={showModalUnavailability}
+              setShowModal={setShowModalUnavailability}
+              unavailabilities={unavailabilities}
+              teacher={teachers.find(
+                (teacher) => teacher.id === selectedTeacherId
+              )}
+            />
           </>
         )}
 
@@ -463,8 +478,19 @@ export default function SchoolNavigation() {
           </div>
         )}
       </div>
+      <div>
+        {displayedByRole === RoleUser.professor &&
+          unavailabilities.length > 0 && (
+            <button
+              onClick={() => setShowModalUnavailability(true)}
+              className="w-full mb-5 flex text-lg text-white items-center p-2 space-x-3 rounded-md bg-first hover:bg-second cursor-pointer"
+            >
+              Absence de l&apos;intervenant
+            </button>
+          )}
 
-      <LogoutButton />
+        <LogoutButton />
+      </div>
     </div>
   );
 }

@@ -14,8 +14,10 @@ import { RoleUser } from "../types/role-user.enum";
 import { getWorkHoursByTeacher } from "../api/getWorkHoursByTeacher";
 import { Workhour } from "../types/work-hour.interface";
 import { getAvailabilities } from "../api/getAvailabilities";
-import { avaibilities } from "../types/avaibilities.interface";
+import { Avaibilities } from "../types/avaibilities.interface";
 import { getWorkHoursByStudent } from "../api/getWorkHoursByStudent";
+import { getUnvailabilities } from "../api/getUnvailabilities";
+import { Unavailabilities } from "../types/unavailabilities.interface";
 
 interface DataContextType {
   fillieres: Filliere[];
@@ -27,14 +29,16 @@ interface DataContextType {
   subjects: Subject[];
   teachers: User[];
   workHours: Workhour[];
+  unavailabilities: Unavailabilities[];
   fetchBranches: () => void;
   fetchSchoolDays: (idClass: string) => void;
   fetchUsers: () => void;
   fetchWorkHours: (idTeacher: string) => void;
-  availabilities: avaibilities[];
+  availabilities: Avaibilities[];
   fetchAvailabilities: (idTeacher: string) => void;
   studentWorkHours: Workhour[];
   fetchStudentWorkHours: (idClass: string) => void;
+  fetchUnAvailabilities: (idUser: string) => void;
 }
 
 const DataContext = createContext<DataContextType>({
@@ -49,12 +53,14 @@ const DataContext = createContext<DataContextType>({
   workHours: [],
   availabilities: [],
   studentWorkHours: [],
+  unavailabilities: [],
   fetchBranches: () => {},
   fetchSchoolDays: () => {},
   fetchUsers: () => {},
   fetchWorkHours: () => {},
   fetchAvailabilities: () => {},
   fetchStudentWorkHours: () => {},
+  fetchUnAvailabilities: () => {},
 });
 
 export const DataProvider = ({ children }: { children: React.ReactNode }) => {
@@ -68,7 +74,10 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
   const [teachers, setTeachers] = useState<User[]>([]);
   const [workHours, setWorkHours] = useState<Workhour[]>([]);
   const [studentWorkHours, setStudentWorkHours] = useState<Workhour[]>([]);
-  const [availabilities, setAvailabilities] = useState<avaibilities[]>([]);
+  const [availabilities, setAvailabilities] = useState<Avaibilities[]>([]);
+  const [unavailabilities, setUnAvailabilities] = useState<Unavailabilities[]>(
+    []
+  );
 
   const fetchBranches = async () => {
     const fillieres = await getBranches();
@@ -116,6 +125,11 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     setAvailabilities(avaibilities);
   };
 
+  const fetchUnAvailabilities = async (idUser: string) => {
+    const unavailabilities = await getUnvailabilities(idUser);
+    setUnAvailabilities(unavailabilities);
+  };
+
   const value = {
     fillieres,
     schoolDays,
@@ -128,6 +142,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     workHours,
     availabilities,
     studentWorkHours,
+    unavailabilities,
     fetchBranches,
     fetchSchoolDays,
     fetchUsers,
@@ -135,6 +150,7 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
     fetchWorkHours,
     fetchAvailabilities,
     fetchStudentWorkHours,
+    fetchUnAvailabilities,
   };
 
   useEffect(() => {
