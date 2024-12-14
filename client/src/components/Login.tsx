@@ -1,6 +1,7 @@
 import React, { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import getUsers from "@/utils/api/getUsers";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -18,7 +19,7 @@ const Login = () => {
       router.push("/");
     } else {
       router.push("/login");
-      alert("Adresse email introuvable.");
+      toast.error("Adresse email introuvable.");
     }
   };
 

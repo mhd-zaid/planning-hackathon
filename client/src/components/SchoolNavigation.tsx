@@ -10,6 +10,7 @@ import { Backlog } from "@/utils/types/back-log.interface";
 import { Classes } from "@/utils/types/classes.interface";
 import ModalGeneratePlanning from "./ModalGeneratePlanning";
 import Image from "next/image";
+import { toast } from "react-toastify";
 
 export default function SchoolNavigation() {
   const { setSemesterRange } = useCalendarContext();
@@ -121,17 +122,25 @@ export default function SchoolNavigation() {
 
   const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     if (!selectedClassId) {
-      alert("Veuillez choisir une classe");
+      toast.error("Veuillez choisir une classe");
       return;
     }
     if (!events.length) {
-      alert("Veuillez choisir des dates");
+      toast.error("Veuillez choisir des dates");
+      return;
+    }
+
+    const formattedEvents = formatEventsToDayDate(events, true);
+    console.log("formattedEvents", formattedEvents);
+    if (!formattedEvents.length) {
+      toast.error("Aucunne nouvelle date à enregistrer.");
       return;
     }
 
     const body = {
-      schoolDays: formatEventsToDayDate(events, true),
+      schoolDays: formattedEvents,
     };
 
     try {
@@ -145,8 +154,12 @@ export default function SchoolNavigation() {
           body: JSON.stringify(body),
         }
       );
+      toast.success("Les jours d'école ont été enregistrés.");
     } catch (error) {
+      toast.error("Erreur lors de l'enregistrement des jours d'école.");
       console.log("error", error);
+    } finally {
+      fetchSchoolDays(selectedClassId);
     }
   };
 

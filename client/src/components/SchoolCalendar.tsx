@@ -11,6 +11,7 @@ import { uuidv4 } from "uuidv7";
 import ModalWorkHour from "./ModalWorkHour";
 import ModalDeleteWorkHour from "./ModalDeleteWorkHour";
 import { RoleUser } from "@/utils/types/role-user.enum";
+import { toast } from "react-toastify";
 
 export default function SchoolCalendar() {
   const {
@@ -88,7 +89,7 @@ export default function SchoolCalendar() {
     });
 
     if (eventExist) {
-      alert("Un seul événement par jour est autorisé.");
+      toast.error("Un seul événement par jour est autorisé.");
     } else {
       setEvents([
         ...events,
@@ -127,7 +128,7 @@ export default function SchoolCalendar() {
     });
 
     if (eventExist) {
-      alert("Un seul événement par jour est autorisé.");
+      toast.error("Un seul événement par jour est autorisé.");
     } else {
       setEvents([
         ...events,
@@ -143,13 +144,15 @@ export default function SchoolCalendar() {
 
   const dateClickSchoolDay = () => {
     if (!!!semesterRange) {
-      alert("Veuillez sélectionner une période.");
+      toast.error("Veuillez sélectionner une période.");
     }
   };
 
   const deleteSchoolDay = async (e: EventClickArg) => {
     if (!!!semesterRange) {
-      alert("Veuillez sélectionner une période pour modifier le calendrier");
+      toast.error(
+        "Veuillez sélectionner une période pour modifier le calendrier"
+      );
       return;
     }
 
@@ -165,7 +168,9 @@ export default function SchoolCalendar() {
           },
         }
       );
+      toast.success("Heure de travail supprimée avec succès.");
     } catch (error) {
+      toast.error("Erreur lors de la suppression de l'heure de travail.");
       console.log(error);
     }
   };
@@ -219,7 +224,7 @@ export default function SchoolCalendar() {
     workHours.forEach((workHour) => {
       const event = {
         id: workHour.id,
-        title: "Professeur",
+        title: workHour.subjectClass.subject.name,
         start: workHour.beginDate,
         end: workHour.endDate,
         allDay: false,

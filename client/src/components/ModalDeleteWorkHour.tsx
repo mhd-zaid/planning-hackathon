@@ -1,5 +1,7 @@
 import { useCalendarContext } from "@/utils/context/calendar";
+import { useDataContext } from "@/utils/context/data";
 import { Dispatch, SetStateAction, useState } from "react";
+import { toast } from "react-toastify";
 
 type ModalDeleteWorkHourProps = {
   showModalDelete: boolean;
@@ -12,8 +14,11 @@ export default function ModalDeleteWorkHour({
   setShowModalDelete,
   idToDelete,
 }: ModalDeleteWorkHourProps) {
-  const { workHourEvent, setWorkhourEvent } = useCalendarContext();
+  const { workHourEvent, setWorkhourEvent, selectedTeacherId } =
+    useCalendarContext();
+  const { fetchWorkHours } = useDataContext();
   const [cause, setCause] = useState<boolean>(false);
+
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -31,9 +36,16 @@ export default function ModalDeleteWorkHour({
           },
         }
       );
+
+      toast.success(
+        `Créneau supprimé avec succès${cause ? "pour cause d'absence" : "."}`
+      );
       setShowModalDelete(false);
     } catch (error) {
+      toast.error("Erreur lors de la suppression du créneau");
       console.log(error);
+    } finally {
+      fetchWorkHours(selectedTeacherId);
     }
   };
 
@@ -42,7 +54,7 @@ export default function ModalDeleteWorkHour({
       tabIndex={-1}
       className={`${
         showModalDelete ? "" : "hidden"
-      } overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full`}
+      } overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 flex justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full`}
     >
       <form onSubmit={submit}>
         <div className="relative p-4 w-full max-w-2xl max-h-full">

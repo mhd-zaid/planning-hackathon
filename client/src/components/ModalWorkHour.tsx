@@ -5,6 +5,7 @@ import { SubjectClasses } from "@/utils/types/subject-classes.interface";
 import { Teacher } from "@/utils/types/teacher.interface";
 import { DateClickArg } from "@fullcalendar/interaction/index.js";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { uuidv4 } from "uuidv7";
 
 type ModalWorkHourProps = {
@@ -18,7 +19,8 @@ export default function ModalWorkHour({
   setShowModal,
   eventWorkHour,
 }: ModalWorkHourProps) {
-  const { classes, subjectClasses, teachers } = useDataContext();
+  const { classes, subjectClasses, teachers, fetchWorkHours } =
+    useDataContext();
   const { workHourEvent, setWorkhourEvent, selectedTeacherId } =
     useCalendarContext();
 
@@ -53,17 +55,17 @@ export default function ModalWorkHour({
     e.preventDefault();
 
     if (!eventWorkHour) {
-      alert("Veuillez selectionner une date");
+      toast.error("Veuillez selectionner une date");
       return;
     }
 
     if (!selectedClasse) {
-      alert("Veuillez selectionner une classe");
+      toast.error("Veuillez selectionner une classe");
       return;
     }
 
     if (!selectedSubjectClasseId) {
-      alert("Veuillez selectionner une matière");
+      toast.error("Veuillez selectionner une matière");
       return;
     }
 
@@ -91,7 +93,9 @@ export default function ModalWorkHour({
         }
       );
 
-      if (resWorkHours.ok) {
+      const json = await resWorkHours.json();
+
+      if (json.workHourSuccess.length > 0) {
         setWorkhourEvent([
           ...workHourEvent,
           {
@@ -101,11 +105,18 @@ export default function ModalWorkHour({
             end: formatEndDante(eventWorkHour.dateStr),
           },
         ]);
+        toast.success("Heure de cours ajoutée avec succès");
       }
-      onClose();
+
+      if (json.workHourError.length > 0) {
+        toast.error(`La classe choisi n'a pas cours ce jour là.`);
+      }
     } catch (error) {
       console.log(error);
+      toast.error("Erreur lors de l'ajout de l'heure de cours");
+    } finally {
       onClose();
+      fetchWorkHours(selectedTeacherId);
     }
   };
 
