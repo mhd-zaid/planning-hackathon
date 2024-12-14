@@ -18,15 +18,13 @@ export default function SchoolCalendar() {
     workHourEvent,
     studentEvents,
     semesterRange,
-    selectedClassId,
     displayedByRole,
     setEvents,
     setWorkhourEvent,
     setStudentEvents,
   } = useCalendarContext();
 
-  const { fillieres, schoolDays, workHours, studentWorkHours } =
-    useDataContext();
+  const { schoolDays, workHours, studentWorkHours } = useDataContext();
 
   const gridDisplayed = {
     [RoleUser.manager]: "dayGridMonth",
@@ -44,10 +42,6 @@ export default function SchoolCalendar() {
   const [eventWorkHour, setEventWorkHour] = useState<DateClickArg>();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showModalDelete, setShowModalDelete] = useState<boolean>(false);
-
-  const selectedClasse = fillieres
-    .flatMap((filliere) => filliere.classes)
-    .find((classe) => classe.id === selectedClassId);
 
   const eventsOverlap = (
     dateStartNewEvent: string,
@@ -100,7 +94,7 @@ export default function SchoolCalendar() {
         ...events,
         {
           id: `NEW-${uuidv4()}`,
-          title: selectedClasse?.name || "",
+          title: "Jour d'école",
           start: event.startStr,
           end: undefined,
         },
@@ -139,7 +133,7 @@ export default function SchoolCalendar() {
         ...events,
         {
           id: `NEW-${uuidv4()}`,
-          title: selectedClasse?.name || "",
+          title: "Jour d'école",
           start: event.startStr,
           end: event.endStr,
         },
@@ -209,7 +203,7 @@ export default function SchoolCalendar() {
     schoolDays.forEach((schoolDay) => {
       const event = {
         id: schoolDay.id,
-        title: schoolDay.class.name,
+        title: "Jour d'école",
         start: schoolDay.date,
         end: undefined,
       };
@@ -239,7 +233,7 @@ export default function SchoolCalendar() {
     studentWorkHours.forEach((studentWorkHour) => {
       const event = {
         id: studentWorkHour.id,
-        title: "Cours de ??",
+        title: studentWorkHour.subjectClass.subject.name,
         start: studentWorkHour.beginDate,
         end: studentWorkHour.endDate,
       };
@@ -278,6 +272,7 @@ export default function SchoolCalendar() {
           eventClick={deleteSchoolDay}
           select={selectDateSchoolDay}
           initialView="dayGridMonth"
+          eventStartEditable={false}
         />
       )}
 
@@ -299,6 +294,7 @@ export default function SchoolCalendar() {
             dateClick={dateClickWorkHour}
             eventClick={deleteWorkHour}
             initialView="timeGridWeek"
+            eventStartEditable={false}
           />
 
           <ModalWorkHour

@@ -303,6 +303,12 @@ const getWorkHoursByClass = async (req, res) => {
             },
           },
           attributes: ["id"],
+          include: [
+            {
+              model: db.Subject,
+              as: "subject",
+            },
+          ],
         },
       ],
     });
