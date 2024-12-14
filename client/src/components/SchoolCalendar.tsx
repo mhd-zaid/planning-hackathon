@@ -296,8 +296,6 @@ export default function SchoolCalendar() {
             nowIndicator={true}
             events={workHourEvent}
             editable={true}
-            validRange={semesterRange || undefined}
-            selectable={!!semesterRange}
             dateClick={dateClickWorkHour}
             eventClick={deleteWorkHour}
             initialView="timeGridWeek"

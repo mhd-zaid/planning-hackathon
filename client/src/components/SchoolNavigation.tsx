@@ -42,7 +42,6 @@ export default function SchoolNavigation() {
   const [filteredClasses, setFilteredClasses] = useState<Classes[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-
   const periodFromFilliere = (selectedFilliereValue: string) => {
     const periods = fillieres
       .find((filliere) => filliere.id === selectedFilliereValue)
@@ -185,10 +184,10 @@ export default function SchoolNavigation() {
   }, [selectedFilliere]);
 
   useEffect(() => {
-    if (selectedTeacherId) return;
+    if (selectedTeacherId || !teachers[0]?.id) return;
 
-    setSelectedTeacherId(teachers[0]?.id || "");
-    fetchWorkHours(teachers[0]?.id || "");
+    setSelectedTeacherId(teachers[0].id);
+    fetchWorkHours(teachers[0].id);
   }, [teachers]);
 
   if (!role) {
@@ -339,12 +338,12 @@ export default function SchoolNavigation() {
           </ul>
         )}
 
-      <ModalGeneratePlanning 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        classId={selectedBacklog}
-        onWorkHoursValidated={handleWorkHoursValidated}
-      />
+        <ModalGeneratePlanning
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          classId={selectedBacklog}
+          onWorkHoursValidated={handleWorkHoursValidated}
+        />
 
         {displayedByRole === RoleUser.professor && (
           <>
@@ -354,7 +353,10 @@ export default function SchoolNavigation() {
             <select
               id="period"
               className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-              onChange={(e) => fetchWorkHours(e.target.value)}
+              onChange={(e) => {
+                fetchWorkHours(e.target.value);
+                setSelectedTeacherId(e.target.value);
+              }}
             >
               {teachers?.map((teacher) => (
                 <option key={teacher.id} value={teacher.id}>
@@ -390,12 +392,14 @@ export default function SchoolNavigation() {
 
             {selectedBacklog && (
               <>
-              <a
-              rel="noopener noreferrer"
-              onClick={() => setIsModalOpen(true)}
-              className="mt-5 flex items-center p-2 space-x-3 rounded-md bg-second hover:bg-second cursor-pointer"
+                <a
+                  rel="noopener noreferrer"
+                  onClick={() => setIsModalOpen(true)}
+                  className="mt-5 flex items-center p-2 space-x-3 rounded-md bg-second hover:bg-second cursor-pointer"
                 >
-                <span className="text-lg text-white">Générer un planning</span>
+                  <span className="text-lg text-white">
+                    Générer un planning
+                  </span>
                 </a>
                 <h3 className="mt-4 font-bold">Récapitulatif des heures</h3>
                 {backlogs.map((backlog, index) => (

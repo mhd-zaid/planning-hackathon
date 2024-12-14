@@ -8,6 +8,7 @@ export interface SubjectClasses {
   period: Period;
   subject: Subject;
   teacher: Teacher;
+  teacherId: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -22,15 +22,30 @@ export default function ModalWorkHour({
   const { workHourEvent, setWorkhourEvent, selectedTeacherId } =
     useCalendarContext();
 
-  const [selectedClassId, setSelectedClassId] = useState<string>("");
+  const [selectedClasse, setSelectedClasse] = useState<Classes | null>(null);
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+
+  const [filteredClassesByTeacher, setFilteredClassesByTeacher] = useState<
+    Classes[]
+  >([]);
+  const [filteredSubjectByTeacher, setFilteredSubjectByTeacher] = useState<
+    SubjectClasses[]
+  >([]);
   const [selectedSubjectClasseId, setSelectedSubjectClasseId] =
     useState<string>("");
 
-  const [selectedClasse, setSelectedClasse] = useState<Classes>();
-  const [selectedSubjectClasse, setSelectedSubjectClasse] =
-    useState<SubjectClasses>();
+  const onClose = () => {
+    setShowModal(false);
+    setSelectedClasse(null);
+    setSelectedTeacher(null);
+    setSelectedSubjectClasseId("");
+  };
 
-  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+  const formatEndDante = (dateWorkHour: string) => {
+    const beginDate = new Date(dateWorkHour.split("+")[0] + "Z");
+    beginDate.setHours(beginDate.getHours() + 1);
+    return beginDate.toISOString().split(".")[0];
+  };
 
   const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -40,7 +55,7 @@ export default function ModalWorkHour({
       return;
     }
 
-    if (!selectedClassId) {
+    if (!selectedClasse) {
       alert("Veuillez selectionner une classe");
       return;
     }
@@ -54,13 +69,13 @@ export default function ModalWorkHour({
       {
         subjectClassId: selectedSubjectClasseId,
         beginDate: eventWorkHour.dateStr.split("+")[0],
-        endDate: (() => {
-          const beginDate = new Date(eventWorkHour.dateStr.split("+")[0] + "Z");
-          beginDate.setHours(beginDate.getHours() + 1);
-          return beginDate.toISOString().split(".")[0];
-        })(),
+        endDate: formatEndDante(eventWorkHour.dateStr),
       },
     ];
+
+    const selectedSubject = subjectClasses.find(
+      (subjectClasse) => subjectClasse.id === selectedSubjectClasseId
+    );
 
     try {
       const resWorkHours = await fetch(
@@ -79,53 +94,63 @@ export default function ModalWorkHour({
           ...workHourEvent,
           {
             id: `NEW-${uuidv4()}`,
-            title: "Je suis dispo",
+            title: `${selectedSubject?.subject.name}`,
             start: eventWorkHour.dateStr,
-            end: undefined,
+            end: formatEndDante(eventWorkHour.dateStr),
           },
         ]);
 
-        setShowModal(false);
+        onClose();
       }
-
-      console.log(resWorkHours);
     } catch (error) {
       console.log(error);
     }
   };
 
-  useEffect(() => {
-    if (selectedClassId) {
-      setSelectedClasse(
-        classes.find((classe) => classe.id === selectedClassId)
-      );
-    }
-  }, [selectedClassId]);
+  const selectClasse = (idClass: string) => {
+    if (!idClass) return;
+
+    setSelectedClasse(
+      classes.find((classe) => classe.id === idClass) as Classes
+    );
+  };
 
   useEffect(() => {
-    if (selectedTeacherId) {
-      setSelectedTeacher(
-        teachers.find((teacher) => teacher.id === selectedTeacherId) || null
-      );
-    }
+    if (!selectedTeacherId) return;
+
+    const teacher = teachers.find(
+      (teacher) => teacher.id === selectedTeacherId
+    );
+
+    const classesByTeacher = classes.filter((classe) =>
+      classe.subjectClasses.some(
+        (subjectClasse) => subjectClasse.teacherId === teacher?.id
+      )
+    );
+
+    setSelectedTeacher(teacher || null);
+
+    setFilteredClassesByTeacher(classesByTeacher);
   }, [selectedTeacherId]);
 
   useEffect(() => {
-    if (selectedSubjectClasseId) {
-      setSelectedSubjectClasse(
-        subjectClasses.find(
-          (subjectClass) => subjectClass.id === selectedSubjectClasseId
-        )
-      );
-    }
-  }, [selectedSubjectClasseId]);
+    if (!selectedClasse || !selectedTeacher) return;
+
+    const subjectClassesByTeacher = filteredClassesByTeacher.map((classe) => {
+      return classe.subjectClasses.find(
+        (subjectClasse) => subjectClasse.teacherId === selectedTeacher?.id
+      ) as SubjectClasses;
+    });
+
+    setFilteredSubjectByTeacher(subjectClassesByTeacher);
+  }, [selectedClasse, selectedTeacher]);
 
   return (
     <div
       tabIndex={-1}
       className={`${
         showModal ? "" : "hidden"
-      } overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full`}
+      } flex overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full`}
     >
       <form onSubmit={submit}>
         <div className="relative p-4 w-full max-w-2xl max-h-full">
@@ -146,10 +171,10 @@ export default function ModalWorkHour({
                   <select
                     id="filliere"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                    onChange={(e) => setSelectedClassId(e.target.value)}
+                    onChange={(e) => selectClasse(e.target.value)}
                   >
                     <option value={""}>Choisir une classe</option>
-                    {classes.map((classe) => (
+                    {filteredClassesByTeacher.map((classe) => (
                       <option key={classe.id} value={classe.id}>
                         {classe.name}
                       </option>
@@ -173,7 +198,7 @@ export default function ModalWorkHour({
                       }
                     >
                       <option value={""}>Choisir une matière</option>
-                      {selectedClasse.subjectClasses.map((subjectClass) => (
+                      {filteredSubjectByTeacher.map((subjectClass) => (
                         <option key={subjectClass.id} value={subjectClass.id}>
                           {subjectClass.subject.name}
                         </option>
@@ -181,20 +206,7 @@ export default function ModalWorkHour({
                     </select>
                   </div>
                 )}
-
-                {selectedClassId && selectedSubjectClasse && (
-                  <p>
-                    Professeur : {selectedSubjectClasse.teacher.firstname}{" "}
-                    {selectedSubjectClasse.teacher.lastname}
-                  </p>
-                )}
               </div>
-              <button
-                type="button"
-                className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
-              >
-                <span className="sr-only">Close modal</span>
-              </button>
             </div>
             <div className="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b">
               <button
@@ -205,7 +217,7 @@ export default function ModalWorkHour({
               </button>
               <button
                 type="button"
-                onClick={() => setShowModal(false)}
+                onClick={onClose}
                 className="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100"
               >
                 Annuler
