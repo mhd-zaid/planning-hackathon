@@ -22,7 +22,7 @@ export default function ModalUnvalabilities({
       tabIndex={-1}
       className={`${
         showModal ? "" : "hidden"
-      } overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 flex justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full`}
+      } overflow-y-auto bg-black bg-opacity-50 overflow-x-hidden fixed top-0 right-0 left-0 z-50 flex justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full`}
     >
       <div className="bg-white rounded-lg p-6 w-[600px] shadow-lg relative">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">
