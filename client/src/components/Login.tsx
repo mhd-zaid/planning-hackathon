@@ -32,7 +32,7 @@ const Login = () => {
             <span className="text-first text-4xl">.</span>
           </p>
         </h1>
-        <h3 className="text-lg text-center text-gray-600 mb-4">
+        <h3 className="font-sans text-lg text-center text-gray-600 mb-4">
           Connectez-vous !
         </h3>
         <form onSubmit={handleSubmit} className="space-y-4">

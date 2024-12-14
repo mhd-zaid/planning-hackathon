@@ -97,7 +97,7 @@ export function Layout() {
           </div>
       ) : (
         <div className="flex-1">
-          <div className="bg-first px-8 py-6 text-2xl font-bold text-white text-center -ml-3 mb-2 -mr-3">Calendrier synaloptique des cours</div>
+          <div className="bg-first px-8 py-6 text-2xl font-bold text-white text-center -ml-3 mb-2 -mr-3">Calendrier synoptique des cours</div>
           {renderCalendar[role]}
         </div>
       )}
