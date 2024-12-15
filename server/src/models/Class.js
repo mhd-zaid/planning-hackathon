@@ -11,14 +11,18 @@ export default function (connection) {
             foreignKey: 'classId',
             as: 'schoolDayClasses',
         });
-        db.Class.belongsToMany(db.User, {
-            through: 'Student_Class',
-            foreignKey: 'classId',
-            as: 'students',
-        });
+        // db.Class.belongsToMany(db.User, {
+        //     through: 'Student_Class',
+        //     foreignKey: 'classId',
+        //     as: 'students',
+        // });
         db.Class.hasMany(db.SubjectClass, {
             foreignKey: 'classId',
             as: 'subjectClasses',
+        });
+        db.Class.hasMany(db.User, {
+            foreignKey: 'classId',
+            as: 'students',
         });
     }
   }

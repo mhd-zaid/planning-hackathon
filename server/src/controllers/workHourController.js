@@ -151,7 +151,6 @@ const deleteWorkHour = async (req, res) => {
         subjectClassId: workHour.subjectClassId,
       });
 
-
       // Étape 1 : Récupérer toutes les `subjectClass` de la classe
       let subjectClasses = await db.SubjectClass.findAll({
         where: {
@@ -161,30 +160,34 @@ const deleteWorkHour = async (req, res) => {
         include: [
           {
             model: db.Subject,
-            as: 'subject',
-            attributes: ['name', 'nbHoursQuota']
+            as: "subject",
+            attributes: ["name", "nbHoursQuota"],
           },
           {
             model: db.WorkHour,
-            as: 'workHours',
-            attributes: ['beginDate', 'endDate']
-          }
+            as: "workHours",
+            attributes: ["beginDate", "endDate"],
+          },
         ],
       });
 
       const backlogs = planningController.calculateBacklog(subjectClasses);
-    
+
       // Filtrage progressif des `subjectClass`
       for (const subjectClass of [...subjectClasses]) {
         const teacherId = subjectClass.teacherId;
 
         // Si le subjectClass a déjà atteint son quota d'heures, exclure la `subjectClass`
-        const subjectRemainingHours = backlogs.find((b) => b.id === subjectClass.id).subjectRemainingHours;
+        const subjectRemainingHours = backlogs.find(
+          (b) => b.id === subjectClass.id
+        ).subjectRemainingHours;
         if (subjectRemainingHours <= 0) {
-          subjectClasses = subjectClasses.filter((sc) => sc.id !== subjectClass.id);
+          subjectClasses = subjectClasses.filter(
+            (sc) => sc.id !== subjectClass.id
+          );
           continue;
         }
-    
+
         // Étape 2 : Vérifier si l'enseignant est disponible pour les heures
         const availability = await db.Availability.findOne({
           where: {
@@ -193,13 +196,15 @@ const deleteWorkHour = async (req, res) => {
             endDate: { [Op.gte]: workHour.endDate },
           },
         });
-    
+
         if (!availability) {
           // Si indisponible, exclure la `subjectClass`
-          subjectClasses = subjectClasses.filter((sc) => sc.id !== subjectClass.id);
+          subjectClasses = subjectClasses.filter(
+            (sc) => sc.id !== subjectClass.id
+          );
           continue;
         }
-    
+
         // Étape 3 : Vérifier si l'enseignant a des heures de travail dans cet intervalle
         const workHourInstances = await db.WorkHour.findAll({
           where: {
@@ -208,14 +213,16 @@ const deleteWorkHour = async (req, res) => {
             endDate: { [Op.lte]: workHour.endDate },
           },
         });
-    
+
         if (workHourInstances.length > 0) {
           // Si des heures existent, exclure la `subjectClass`
-          subjectClasses = subjectClasses.filter((sc) => sc.id !== subjectClass.id);
+          subjectClasses = subjectClasses.filter(
+            (sc) => sc.id !== subjectClass.id
+          );
           continue;
         }
       }
-    
+
       // Étape 4 : Créer des remplacements pour les `subjectClass` restants
       for (const subjectClass of subjectClasses) {
         await db.Replacement.create({
@@ -255,7 +262,7 @@ const getWorkHoursByUser = async (req, res) => {
     }
 
     const workHours = await db.WorkHour.findAll({
-      attributes: ["beginDate", "endDate"],
+      attributes: ["beginDate", "endDate", "id"],
       include: [
         {
           model: db.SubjectClass,
@@ -264,6 +271,12 @@ const getWorkHoursByUser = async (req, res) => {
             teacherId: userId,
           },
           attributes: ["id"],
+          include: [
+            {
+              model: db.Subject,
+              as: "subject",
+            },
+          ],
         },
       ],
     });
@@ -289,7 +302,9 @@ const getWorkHoursByClass = async (req, res) => {
       },
     });
 
-    const subjectClassIds = subjectClasses.map((subjectClass) => subjectClass.id);
+    const subjectClassIds = subjectClasses.map(
+      (subjectClass) => subjectClass.id
+    );
 
     const workHours = await db.WorkHour.findAll({
       attributes: ["beginDate", "endDate"],
@@ -303,16 +318,26 @@ const getWorkHoursByClass = async (req, res) => {
             },
           },
           attributes: ["id"],
+          include: [
+            {
+              model: db.Subject,
+              as: "subject",
+            },
+          ],
         },
       ],
     });
 
     return res.status(200).json(workHours);
-  }
-  catch (error) {
+  } catch (error) {
     console.error("Une erreur s'est produite :", error);
     return res.status(500).error("Une erreur s'est produite");
   }
-}
+};
 
-export default { create, deleteWorkHour, getWorkHoursByUser, getWorkHoursByClass };
+export default {
+  create,
+  deleteWorkHour,
+  getWorkHoursByUser,
+  getWorkHoursByClass,
+};

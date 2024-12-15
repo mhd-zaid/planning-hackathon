@@ -2,7 +2,16 @@ import db from '../models/index.js';
 
 const getAll = async(req, res) => {
     try {
-      const users = await db.User.findAll();
+      const users = await db.User.findAll(
+        {
+          include: [
+            {
+              model: db.Class,
+              as: 'class',
+            },
+          ],
+        }
+      );
       return res.status(200).json(users);
     } catch (error) {
       console.error("Une erreur s'est produite :", error);

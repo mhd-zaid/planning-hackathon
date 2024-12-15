@@ -20,6 +20,10 @@ export default function (connection) {
         foreignKey: 'userId',
         as: 'unavailabilities',
         });
+      db.User.belongsTo(db.Class, {
+        foreignKey: 'classId',
+        as: 'class',
+      });
     }
   }
 

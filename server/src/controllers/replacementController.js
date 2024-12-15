@@ -84,4 +84,22 @@ const declineReplacement = async (req, res) => {
     }
 }
 
-export default { acceptReplacement, declineReplacement };
+const getAllReplacements = async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        const replacements = await db.Replacement.findAll({
+            where:{
+                teacherId: userId,
+            }
+        });
+        return res.status(200).send(replacements);
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send({
+        message: "Une erreur est survenue.",
+        });
+    }
+};
+
+export default { acceptReplacement, declineReplacement, getAllReplacements };
